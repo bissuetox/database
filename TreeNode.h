@@ -1,5 +1,8 @@
 #ifndef TREENODE_H
     #define TREENODE_H
+    #include <iostream>
+    using namespace std;
+
     template <class T>
     class TreeNode {
         public:
