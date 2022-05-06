@@ -1,6 +1,11 @@
-#include "Person.h"
+#include "Faculty.h"
+#include "Student.h"
 
 int main(int argc, char **argv) {
-	Person p(1, "tim");
-    p.print();
+	Faculty f(1, "bob", "professor", "CS");
+    f.print();
+
+    Student s(1, "jimmy", "freshman", "CS", 4.0, 1);
+    s.print();
+
 }

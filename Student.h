@@ -10,8 +10,10 @@
             string major;
             double gpa;
             int advisor_id;
+
             Student();
-            Student(string new_level, string new_major, double new_gpa, int new_advisor_id);
+            Student(int new_id, string new_name, string new_level, string new_major, double new_gpa, int new_advisor_id);
+            void print();
     };
 
 #endif

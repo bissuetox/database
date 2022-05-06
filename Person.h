@@ -3,6 +3,7 @@
     #include <iostream>
     using namespace std;
     
+    // Faculty class - inherits Person
     class Person {
         public:
             int id;

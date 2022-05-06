@@ -18,6 +18,7 @@
 
 * Class notes
 * [Misc Info - cppreference.com](cppreference.com)
+* [Vectors](https://www.geeksforgeeks.org/vector-in-cpp-stl/)
 
 ## Known Errors
 
