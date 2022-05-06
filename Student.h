@@ -6,8 +6,12 @@
     
     class Student : public Person {
         public:
-            int id;
-            string name;
+            string level;
+            string major;
+            double gpa;
+            int advisor_id;
+            Student();
+            Student(string new_level, string new_major, double new_gpa, int new_advisor_id);
     };
 
 #endif
