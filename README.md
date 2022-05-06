@@ -19,6 +19,8 @@
 * Class notes
 * [Misc Info - cppreference.com](cppreference.com)
 * [Vectors](https://www.geeksforgeeks.org/vector-in-cpp-stl/)
+* [BST Search/Insert](https://www.geeksforgeeks.org/binary-search-tree-set-1-search-and-insertion/?ref=lbp)
+* [BST Delete](https://www.geeksforgeeks.org/binary-search-tree-set-2-delete/?ref=lbp)
 
 ## Known Errors
 

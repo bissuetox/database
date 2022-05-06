@@ -11,6 +11,9 @@
             Person();
             Person(int new_id, string new_name);
             void print();
+            friend bool operator== (const Person& argPerson, const Person& thisPerson);
+            friend bool operator< (const Person& argPerson, const Person& thisPerson);
+            friend bool operator> (const Person& argPerson, const Person& thisPerson);
     };
 
 #endif
