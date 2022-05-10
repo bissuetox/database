@@ -9,6 +9,9 @@ int main(int argc, char **argv) {
     // cout << tn.data << endl;
 
     BST<int> bst;
-    
-
+    // bst.insert_iter(5);
+    // bst.insert_iter(10);
+    // bst.insert_iter(3);
+    bst.insert(5);
+    bst.inorder(bst.root);
 }
