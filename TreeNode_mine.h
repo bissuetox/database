@@ -7,8 +7,8 @@
     class TreeNode {
         public:
             T data;
-            TreeNode *left;
-            TreeNode *right;
+            TreeNode<T> *left;
+            TreeNode<T> *right;
             TreeNode();
             TreeNode(T new_data);
     };
@@ -18,6 +18,7 @@
     TreeNode<T>::TreeNode() {
         left = NULL;
         right = NULL;
+        key = NULL;
     }
 
     // Overloaded Constructor

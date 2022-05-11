@@ -1,126 +1,188 @@
 #ifndef BST_H
     #define BST_H
-    #include "TreeNode.h"
+    #include <iostream>
     using namespace std;
 
     template <class T>
-    class BST {
+    class TreeNode{
         public:
-            TreeNode<T>* root;
-            int size;
+            TreeNode();
+            TreeNode(T key);
+            virtual ~TreeNode();
 
-            BST();
-            void insert_iter(T data);
-            TreeNode<T>* insert_rec(TreeNode<T>* node, T data);
-            void insert(T data);
-            bool search(T data);
-            void remove(T data);
-            void inorder(TreeNode<T> *node);
+            T key; //key = data
+            TreeNode<T> *left;
+            TreeNode<T> *right;
     };
 
     template <class T>
-    BST<T>::BST() {
+    TreeNode<T>::TreeNode(){
+        left = NULL;
+        right = NULL;
+        key = NULL;
+    }
+
+    template <class T>
+    TreeNode<T>::TreeNode(T k){
+        left = NULL;
+        right = NULL;
+        key = k;
+    }
+
+    template <class T>
+    TreeNode<T>::~TreeNode(){
+        left = NULL;
+        right = NULL;
+    }
+
+    template <class T>
+    class BST{
+        public:
+            BST();
+            virtual ~BST();
+            void insert(T value);
+            bool contains(T value);//search
+            bool deleteNode(T k);
+            bool isEmpty();
+
+            T* getMin();
+            T* getMax();
+            TreeNode<T> *getSuccessor(TreeNode<T> *d); //d represents the node we are going to delete
+            void printNodes();
+            void recPrint(TreeNode<T> *node);
+            T calcSum(TreeNode<T> *node);
+            TreeNode<T>* getRoot();
+        private:
+            TreeNode<T> *root;
+    };
+
+    template <class T>
+    BST<T>::BST(){
         root = NULL;
     }
 
-
     template <class T>
-    void BST<T>::inorder(TreeNode<T> *node) {
-        if (node == NULL) return;
-        else {
-            inorder(node->left);
-            cout << node->data << " ";
-            inorder(node->right);
-        }
+    BST<T>::~BST(){
+        //build some character
+        //and do a little research
     }
 
-    // Iterative insertion
     template <class T>
-    void BST<T>::insert_iter(T data) {
-        TreeNode<T> *newNode = new TreeNode<T>(data);
+    TreeNode<T>* BST<T>::getRoot(){
+        return root;
+    }
 
-        // If root is null, make the new node root
-        if (root == NULL) {
-            root = newNode;
+    template <class T>
+    void BST<T>::recPrint(TreeNode<T> *node){
+        if(node == NULL)
             return;
-        }
 
-        TreeNode<T> *curr = root;
-        // Traverse until current finds spot
-        while(curr != NULL) {
-            // If data less than current, look left
-            if (data < curr->data) {
-                // If left child is null, insert
-                if (curr->left == NULL) {
-                    curr->left = newNode;
-                    curr = NULL; // Break loop
+        cout << node->key << endl;
+        recPrint(node->left);
+        recPrint(node->right);
+    }
+
+    template <class T>
+    T BST<T>::calcSum(TreeNode<T> *node){
+        if(node == NULL)
+            return 0;
+        
+        return (node->key + calcSum(node->left) + calcSum(node->right));
+    }
+
+    template <class T>
+    /*this function prints the entire tree*/
+    void BST<T>::printNodes(){
+        recPrint(root);
+    }
+
+    template <class T>
+    bool BST<T>::isEmpty(){
+        return (root == NULL);
+    }
+
+    template <class T>
+    T* BST<T>::getMin(){
+        if(isEmpty())
+            return NULL;
+
+        TreeNode<T> *current = root;
+        while(current->left != NULL){
+            current = current->left;
+        }
+        return &(current->key);
+    }
+
+    template <class T>
+    T* BST<T>::getMax(){
+        if(isEmpty())
+            return NULL;
+
+        TreeNode<T> *current = root;
+        while(current->right != NULL){
+            current = current->right;
+        }
+        return &(current->key);
+    }
+
+    template <class T>
+    void BST<T>::insert(T value){
+        TreeNode<T> *node = new TreeNode<T>(value);
+        
+        if(isEmpty())
+            root = node;
+        else{
+            //the tree is not empty
+            TreeNode<T> *current = root;
+            TreeNode<T> *parent = NULL;
+
+            while(true){
+                parent = current;
+                
+                if(value < current->key){
+                    //we go left
+                    current = current->left;
+                    if(current == NULL){
+                        //we found the insertion point
+                        parent->left = node;
+                        break;
+                    }
                 }
-                // Else traverse left
-                else {
-                    curr = curr->left;
-                }
-            } else {
-                // If right child is null, insert
-                if (curr->right == NULL) {
-                    curr->right = newNode;
-                    curr = NULL; // Break loop
-                }
-                // Else traverse right
-                else {
-                    curr = curr->right;
+                else{
+                    //we go right
+                    current = current->right;
+                    if(current == NULL){
+                        //we found the insertion point
+                        parent->right = node;
+                        break;
+                    }
                 }
             }
         }
+        
     }
 
-    // Wrapper for recursive insertion so we don't have to worry about passing root
     template <class T>
-    void BST<T>::insert(T data) {
-        if (root == NULL) {
-            root = new TreeNode<T>(data);
-        } else {
-            insert_rec(root, data);
+    bool BST<T>::contains(T value){
+        if(isEmpty())
+            return false;
+
+        TreeNode<T> *current = root;
+
+        while(current->key != value){
+            if(value < current->key)
+                current = current->left;
+            else
+                current = current->right;
+
+            if(current == NULL)
+                return false;
         }
+        return true;
     }
 
-    // Recursive function for inserting
     template <class T>
-    TreeNode<T>* BST<T>::insert_rec(TreeNode<T>* node, T data) {
-        // If reached a null location, pass the new node up
-        if (node == NULL) {
-            return new TreeNode<T>(data);
-        }
-
-        // Traverse left
-        if (data < node->data) {
-            node->left = insert_rec(node->left, data);
-        }
-
-        // Traverse right
-        else {
-            node->right = insert_rec(node->right, data);
-        }
-
-        // Bubble up the node after insertion calls
-        return node;
-    }
-
-    // Recursive Search
-    template <class T>
-    bool BST<T>::search(T data) {
-        if (root == NULL || root->data == data) {
-            return root;
-        }
-        if (root->data < data) {
-            return search(root->right, data);
-        }
-
-        return search(root->left, data);
-    }
-
-    // Iterative Remove
-    template <class T>
-    void BST<T>::remove(T data) {
+    bool BST<T>::deleteNode(T k){
         // Track current and parent node
         TreeNode<T> *par = NULL;
         TreeNode<T> *curr = root;
@@ -203,5 +265,13 @@
         // Not found if we reached this point
         return;
     }
+
+    template <class T>
+    /* d represents the node to be delete */
+    TreeNode<T>* BST<T>::getSuccessor(TreeNode<T> *d){
+        
+    }
+
+
 
 #endif
