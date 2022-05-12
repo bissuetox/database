@@ -16,19 +16,19 @@ Student::Student(int new_id, string new_name, string new_level, string new_major
     advisor_id = new_advisor_id;
 }
 
-void Student::print() {
-    cout << "ID: " << id << endl;
-    cout << "Name: " << name << endl;
-    cout << "Grade: " << level << endl;
-    cout << "Major: " << major << endl;
-    cout << "GPA: " << gpa << endl;
+void Student::print(ostream& os) const {
+    os << "ID: " << id << endl;
+    os << "Name: " << name << endl;
+    os << "Grade: " << level << endl;
+    os << "Major: " << major << endl;
+    os << "GPA: " << gpa << endl;
 
     // Advisor id is -1 if unset (only in chicken or egg situation)
     if (advisor_id == -1) {
-        cout << "No advisor assigned!" << endl;
+        os << "No advisor assigned!" << endl;
     } else {
-        cout << "Advisor ID: " << advisor_id << endl;
+        os << "Advisor ID: " << advisor_id << endl;
     }
 
-    cout << endl;
+    os << endl;
 }

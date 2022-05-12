@@ -12,8 +12,8 @@ Person::Person(int new_id, string new_name) {
     name = new_name;
 }
 
-void Person::print() {
-    cout << "ID: " << id << " | Name: " << name << endl;
+void Person::print(ostream& os) const {
+    os << "ID: " << id << " | Name: " << name << endl;
 }
 
 // Equality Operator Overload
@@ -29,4 +29,9 @@ bool operator< (const Person& argPerson, const Person& thisPerson) {
 // Greater than Operator Overload
 bool operator> (const Person& argPerson, const Person& thisPerson) {
     return argPerson.id > thisPerson.id;
+}
+
+ostream& operator<<(ostream& os, const Person& thisPerson) {
+    thisPerson.print(os);
+    return os;
 }

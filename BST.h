@@ -90,8 +90,8 @@
         return (node->key + calcSum(node->left) + calcSum(node->right));
     }
 
-    template <class T>
     /*this function prints the entire tree*/
+    template <class T>
     void BST<T>::printNodes(){
         recPrint(root);
     }
@@ -182,7 +182,7 @@
     }
 
     template <class T>
-    bool BST<T>::deleteNode(T k){
+    bool BST<T>::deleteNode(T key){
         // Track current and parent node
         TreeNode<T> *par = NULL;
         TreeNode<T> *curr = root;
@@ -190,7 +190,7 @@
         // Search for node to remove
         while (curr != NULL) {
             // If node is found
-            if (curr->data == data) {
+            if (curr->key == key) {
                 // Leaf case
                 if (curr->left == NULL && curr->right == NULL) {
                     // If par is unset, tree only contains root node
@@ -240,19 +240,16 @@
                 // Node has two children
                 else {
                     // Must find successor (leftmost child of right subtree)
-                    TreeNode<T> *suc = curr->right;
-                    while (suc->left != NULL) {
-                        suc = suc->left;
-                    }
-                    T sucData = suc->data;
+                    TreeNode<T> *suc = getSuccessor(curr);
+                    T sucData = suc->key;
                     remove(sucData); // Remove the successor
-                    curr->data = sucData; // Replace current's data with successor
+                    curr->key = sucData; // Replace current's key with successor
                 }
 
-                return;
+                return true;
             }
             // Traverse left
-            else if (data < curr->data) {
+            else if (key < curr->key) {
                 par = curr;
                 curr = curr->left;
             }
@@ -263,15 +260,17 @@
             }
         }
         // Not found if we reached this point
-        return;
+        return true;
     }
 
     template <class T>
     /* d represents the node to be delete */
     TreeNode<T>* BST<T>::getSuccessor(TreeNode<T> *d){
-        
+        TreeNode<T> *suc = d->right;
+        while (suc->left != NULL) {
+            suc = suc->left;
+        }
+        return suc;
     }
-
-
 
 #endif

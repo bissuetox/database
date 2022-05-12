@@ -19,6 +19,8 @@
             void setup();
             void parseTable(string path);
             void interfaceLoop();
+            void printOptions();
+            void ingestChoice(int choiceInt);
     };
 
 #endif
