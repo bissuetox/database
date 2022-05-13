@@ -1,24 +1,31 @@
 #include "Database.h"
 #include <exception>
+#define STUDENT_PATH "./db/studentTable.csv"
+#define FACULTY_PATH "./db/facultyTable.csv"
 
 Database::Database() {
 
 }
 
 void Database::setup() {
-
+    string read;
+    fp.openRead(STUDENT_PATH);
+    // If file exists and is open, try to scan it in
+    if (fp.isOpenRead()) {
+        cout << "Is open!" << endl;
+        while(fp.getLine(read)) {
+            cout << read << endl;
+        }
+    } else {
+        cout << "Not open" << endl;
+    }
 }
 
 void Database::interfaceLoop() {
-    // trxHistory.push();
-    BST<Student> bst;
-    Student s1(1, "Jimmy", "Freshman", "CS", 4.0, -1);
-    bst.insert(s1);
-    bst.printNodes();
-
     int choiceInt;
     string choiceStr;
 
+    // Main Loop
     do {
         printOptions();
 
@@ -35,10 +42,12 @@ void Database::interfaceLoop() {
     } while(choiceInt != 14);
 }
 
+// Processes the user's choice
 void Database::ingestChoice(int choiceInt) {
     switch(choiceInt) {
         case 1:
             // printAllStudents();
+            masterStudent.printNodes();
             break;
         case 2:
             // printAllFaculty();

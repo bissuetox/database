@@ -1,12 +1,11 @@
 #ifndef DATABASE_H
     #define DATABASE_H
-    #define STUDENT_PATH "./db/studentTable.csv"
-    #define FACULTY_PATH "./db/facultyTable.csv"
     #include "Faculty.h"
     #include "Student.h"
     #include "BST.h"
     #include "GenStack.h"
     #include "DBTrx.h"
+    #include "FileProcessor.h"
     using namespace std;
 
     class Database {
@@ -14,6 +13,7 @@
             BST<Faculty*> masterFaculty;
             BST<Student*> masterStudent;
             GenStack<DBTrx*> trxHistory;
+            FileProcessor fp;
         public:
             Database();
             void setup();
