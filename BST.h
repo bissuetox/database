@@ -49,16 +49,19 @@
             T* getMax();
             TreeNode<T> *getSuccessor(TreeNode<T> *d); //d represents the node we are going to delete
             void printNodes();
-            void recPrint(TreeNode<T> *node);
+            void inOrder(TreeNode<T> *node);
             T calcSum(TreeNode<T> *node);
             TreeNode<T>* getRoot();
+            int getNumNodes();
         private:
             TreeNode<T> *root;
+            int numNodes;
     };
 
     template <class T>
     BST<T>::BST(){
         root = NULL;
+        numNodes = 0;
     }
 
     template <class T>
@@ -73,13 +76,13 @@
     }
 
     template <class T>
-    void BST<T>::recPrint(TreeNode<T> *node){
+    void BST<T>::inOrder(TreeNode<T> *node){
         if(node == NULL)
             return;
 
+        inOrder(node->left);
         cout << node->key << endl;
-        recPrint(node->left);
-        recPrint(node->right);
+        inOrder(node->right);
     }
 
     template <class T>
@@ -90,10 +93,10 @@
         return (node->key + calcSum(node->left) + calcSum(node->right));
     }
 
-    /*this function prints the entire tree*/
+    // Prints the entire tree with In Order traversal
     template <class T>
     void BST<T>::printNodes(){
-        recPrint(root);
+        inOrder(root);
     }
 
     template <class T>
@@ -126,6 +129,10 @@
     }
 
     template <class T>
+    int BST<T>::getNumNodes() {
+        return numNodes;
+    }
+    template <class T>
     void BST<T>::insert(T value){
         TreeNode<T> *node = new TreeNode<T>(value);
         
@@ -145,6 +152,7 @@
                     if(current == NULL){
                         //we found the insertion point
                         parent->left = node;
+                        ++numNodes;
                         break;
                     }
                 }
@@ -154,6 +162,7 @@
                     if(current == NULL){
                         //we found the insertion point
                         parent->right = node;
+                        ++numNodes;
                         break;
                     }
                 }
@@ -246,6 +255,7 @@
                     curr->key = sucData; // Replace current's key with successor
                 }
 
+                --numNodes; // Decrement num nodes
                 return true;
             }
             // Traverse left

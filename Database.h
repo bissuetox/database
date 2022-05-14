@@ -21,6 +21,8 @@
             void interfaceLoop();
             void printOptions();
             void ingestChoice(int choiceInt);
+
+            void printAllStudents();
     };
 
 #endif

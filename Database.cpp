@@ -113,3 +113,11 @@ void Database::printOptions() {
     options += "14. Exit\n";
     cout << options << "> ";
 }
+
+void Database::printAllStudents() {
+    if (masterStudent.getNumNodes() == 0) {
+        cout << "No Students in the Database!" << endl;
+    } else {
+        masterStudent.printNodes();
+    }
+}
