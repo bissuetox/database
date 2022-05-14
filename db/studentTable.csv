@@ -1,3 +1,2 @@
-pee pee
-poo poo
-id,name,level,major,gpa,advisor_id
+# id,name,level,major,gpa,advisor_id
+1,chris,junior,cs,4.0,-1

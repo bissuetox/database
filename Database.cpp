@@ -1,5 +1,7 @@
 #include "Database.h"
 #include <exception>
+// #include <string.h>
+#include <sstream>
 #define STUDENT_PATH "./db/studentTable.csv"
 #define FACULTY_PATH "./db/facultyTable.csv"
 
@@ -9,18 +11,33 @@ Database::Database() {
 
 void Database::setup() {
     string read;
+
+    // Import student data
     fp.openRead(STUDENT_PATH);
     // If file exists and is open, try to scan it in
     if (fp.isOpenRead()) {
-        cout << "Is open!" << endl;
         while(fp.getLine(read)) {
-            cout << read << endl;
-            // parseAddStudent();
-            // promptStudentInfo();
-            // addStudent();
+            // Ignore comments with '#'
+            if (read.at(0) == '#') {
+                continue;
+            } else {
+                parseAddStudent(read);
+            }
         }
-    } else {
-        cout << "Not open" << endl;
+    }
+
+    // Import faculty data
+    fp.openRead(FACULTY_PATH);
+    // If file exists and is open, try to scan it in
+    if (fp.isOpenRead()) {
+        while(fp.getLine(read)) {
+            // Ignore comments with '#'
+            if (read.at(0) == '#') {
+                continue;
+            } else {
+                // parseAddFaculty(read);
+            }
+        }
     }
 }
 
@@ -73,7 +90,7 @@ void Database::ingestChoice(int choiceInt) {
             // deleteStudentById();
             break;
         case 9:
-            // addFaculty();
+            promptAddFaculty();
             break;
         case 10:
             // deleteFacultyById();
@@ -133,6 +150,7 @@ void Database::printAllFaculty() {
     }
 }
 
+// Adds a student to masterStudent
 void Database::addStudent(int id, string name, string level, string major, double gpa, int advisor_id) {
     Student* newStudent = new Student(id, name, level, major, gpa, advisor_id);
     masterStudent.insert(newStudent);
@@ -183,4 +201,64 @@ void Database::promptAddStudent() {
             success = false;
         }
     }
+}
+
+void Database::parseAddStudent(string line) {
+    stringstream lineStream(line);
+    string name, level, major, id_str, advisor_id_str, gpa_str;
+    int id, advisor_id;
+    double gpa;
+
+    // We could detect corrupted files with invalid data, but we already built some character
+    // csv format - id,name,level,major,gpa,advisor_id
+    getline(lineStream, id_str, ',');
+    getline(lineStream, name, ',');
+    getline(lineStream, level, ',');
+    getline(lineStream, major, ',');
+    getline(lineStream, gpa_str, ',');
+    getline(lineStream, advisor_id_str, ',');
+
+    gpa = stod(gpa_str);
+    id = stoi(id_str);
+    advisor_id = stoi(advisor_id_str);
+
+    addStudent(id, name, level, major, gpa, advisor_id);
+}
+
+void Database::addFaculty(int id, string name, string level, string department) {
+    Faculty* newFaculty = new Faculty(id, name, level, department);
+    // If first faculty, update all student's ID's to this faculty? Dependent on custom iterator
+    masterFaculty.insert(newFaculty);
+}
+
+void Database::promptAddFaculty() {
+    string id_str, name, level, department;
+    int id;
+    bool success = false;
+    while (!success) {
+        try {
+            success = true;
+            cout << "Enter faculty ID: \n> ";
+            getline(cin, id_str);
+            id = stoi(id_str);
+
+            cout << "Enter faculty name: \n> ";
+            getline(cin, name);
+
+            cout << "Enter faculty level: \n> ";
+            getline(cin, level);
+
+            cout << "Enter faculty department: \n> ";
+            getline(cin, department);
+
+            addFaculty(id, name, level, department);
+        } catch (invalid_argument) {
+            cout << "Invalid input! Try again." << endl << endl;
+            success = false;
+        }
+    }
+}
+
+void Database::parseAddFaculty(string line) {
+
 }

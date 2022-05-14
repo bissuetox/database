@@ -13,7 +13,7 @@
             vector<int> advisee_ids;
             Faculty();
             Faculty(int new_id, string new_name, string new_level, string new_department);
-            void print();
+            void print(ostream& os) const;
     };
 
 #endif

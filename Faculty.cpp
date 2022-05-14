@@ -14,20 +14,20 @@ Faculty::Faculty(int new_id, string new_name, string new_level, string new_depar
     // Leave advisee_ids empty
 }
 
-void Faculty::print() {
-    cout << "ID: " << id << endl;
-    cout << "Name: " << name << endl;
-    cout << "Role: " << level << endl;
-    cout << "Department: " << department << endl;
+void Faculty::print(ostream& os) const {
+    os << "ID: " << id << endl;
+    os << "Name: " << name << endl;
+    os << "Role: " << level << endl;
+    os << "Department: " << department << endl;
 
     if (advisee_ids.size() == 0) {
-        cout << "No Student Advisees!" << endl;
+        os << "No Student Advisees!" << endl;
     } else {
-        cout << "Student IDs:" << endl;
+        os << "Student IDs:" << endl;
         for (auto i = advisee_ids.begin(); i != advisee_ids.end(); ++i) {
-            cout << "ID: " << advisee_ids.at(*i) << endl;
+            os << "ID: " << advisee_ids.at(*i) << endl;
         }
     }
 
-    cout << endl;
+    os << endl;
 }
