@@ -40,6 +40,7 @@
         public:
             BST();
             virtual ~BST();
+            T* search(T k);
             void insert(T value);
             bool contains(T value);//search
             bool deleteNode(T k);
@@ -131,6 +132,22 @@
     template <class T>
     int BST<T>::getNumNodes() {
         return numNodes;
+    }
+
+    template <class T>
+    T* BST<T>::search(T k) {
+        TreeNode<T> *curr = root;
+        while (curr != NULL) {
+            if (k == curr->key) {
+                return &(curr->key); // Found
+            } else if (k < curr->key) {
+                curr = curr->left;
+            } else {
+                curr = curr->right;
+            }
+        }
+        // Not found
+        return NULL;
     }
 
     template <class T>

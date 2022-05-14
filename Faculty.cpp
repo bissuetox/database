@@ -23,11 +23,26 @@ void Faculty::print(ostream& os) const {
     if (advisee_ids.size() == 0) {
         os << "No Student Advisees!" << endl;
     } else {
-        os << "Student IDs:" << endl;
+        cout << "Student IDs:" << endl;
         for (auto i = advisee_ids.begin(); i != advisee_ids.end(); ++i) {
-            os << "ID: " << advisee_ids.at(*i) << endl;
+            cout << advisee_ids.at(*i) << endl;
         }
     }
 
     os << endl;
+}
+
+void Faculty::addAdviseeId(int id) {
+    advisee_ids.push_back(id);
+}
+
+void Faculty::printAdvisees(BST<Student*>& masterStudent) {
+    int thisId;
+    Student *thisStudent;
+    for (auto i = advisee_ids.begin(); i != advisee_ids.end(); ++i) {
+        thisId = advisee_ids.at(*i);
+        Student dummyStudent(thisId, "", "", "", 0, 0); // Dummy student with id to search
+        thisStudent = *masterStudent.search(&dummyStudent);
+        cout << thisStudent->id << " - " << thisStudent->name << endl;
+    }
 }

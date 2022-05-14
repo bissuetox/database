@@ -18,6 +18,7 @@ void Person::print(ostream& os) const {
 
 // Equality Operator Overload
 bool operator== (const Person& argPerson, const Person& thisPerson) {
+    cout << argPerson.id << " == " << thisPerson.id << endl;
     return argPerson.id == thisPerson.id;
 }
 

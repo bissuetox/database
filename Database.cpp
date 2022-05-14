@@ -18,24 +18,23 @@ void Database::setup() {
     if (fp.isOpenRead()) {
         while(fp.getLine(read)) {
             // Ignore comments with '#'
-            if (read.at(0) == '#') {
-                continue;
-            } else {
+            if (read.at(0) == '#') continue;
+            else {
                 parseAddStudent(read);
             }
         }
     }
 
     // Import faculty data
+    fp.closeRead();
     fp.openRead(FACULTY_PATH);
     // If file exists and is open, try to scan it in
     if (fp.isOpenRead()) {
         while(fp.getLine(read)) {
             // Ignore comments with '#'
-            if (read.at(0) == '#') {
-                continue;
-            } else {
-                // parseAddFaculty(read);
+            if (read.at(0) == '#') continue;
+            else {
+                parseAddFaculty(read);
             }
         }
     }
@@ -81,7 +80,7 @@ void Database::ingestChoice(int choiceInt) {
            // findStudentsAdvisor(); 
            break;
         case 6:
-            // findFacultysAdvisees();
+            promptPrintFacultysAdvisees();
             break;
         case 7:
             promptAddStudent();
@@ -151,9 +150,10 @@ void Database::printAllFaculty() {
 }
 
 // Adds a student to masterStudent
-void Database::addStudent(int id, string name, string level, string major, double gpa, int advisor_id) {
+Student* Database::addStudent(int id, string name, string level, string major, double gpa, int advisor_id) {
     Student* newStudent = new Student(id, name, level, major, gpa, advisor_id);
     masterStudent.insert(newStudent);
+    return newStudent;
 }
 
 // Prompts user for student data then adds it to masterStudent
@@ -203,6 +203,7 @@ void Database::promptAddStudent() {
     }
 }
 
+// Parses student data from a file line
 void Database::parseAddStudent(string line) {
     stringstream lineStream(line);
     string name, level, major, id_str, advisor_id_str, gpa_str;
@@ -225,12 +226,15 @@ void Database::parseAddStudent(string line) {
     addStudent(id, name, level, major, gpa, advisor_id);
 }
 
-void Database::addFaculty(int id, string name, string level, string department) {
+// Adds a faculty to masterFaculty
+Faculty* Database::addFaculty(int id, string name, string level, string department) {
     Faculty* newFaculty = new Faculty(id, name, level, department);
     // If first faculty, update all student's ID's to this faculty? Dependent on custom iterator
     masterFaculty.insert(newFaculty);
+    return newFaculty;
 }
 
+// Prompts user for faculty data then adds it to masterFaculty
 void Database::promptAddFaculty() {
     string id_str, name, level, department;
     int id;
@@ -259,6 +263,52 @@ void Database::promptAddFaculty() {
     }
 }
 
+// Parses faculty data from a file line
 void Database::parseAddFaculty(string line) {
+    stringstream lineStream(line);
+    string id_str, name, level, department, advisee_ids;
+    int id;
 
+    // id,name,level,department,a_id1;a_id1;a_id1;a_id1;
+
+    getline(lineStream, id_str, ',');
+    getline(lineStream, name, ',');
+    getline(lineStream, level, ',');
+    getline(lineStream, department, ',');
+    getline(lineStream, advisee_ids, ',');
+
+    id = stoi(id_str);
+    Faculty* newFaculty = addFaculty(id, name, level, department);
+
+    // Iterate through advisee_ids (variable amt)
+    stringstream idStream(advisee_ids);
+
+    string read;
+    while (getline(idStream, read, ';')) {
+        newFaculty->advisee_ids.push_back(stoi(read));
+    }
+}
+
+// Prompts for Faculty ID and prints its advisees
+void Database::promptPrintFacultysAdvisees() {
+    bool success = false;
+    while (!success) {
+        try {
+            success = true;
+            string read;
+            int id;
+            cout << "Enter faculty ID: \n> ";
+            getline(cin, read);
+            id = stoi(read);
+            Faculty dummyFaculty(id, "", "", ""); // Dummy Faculty object for searching
+            // Search returns double pointer to faculty
+            Faculty** foundFaculty = masterFaculty.search(&dummyFaculty);
+            if (foundFaculty == NULL) throw invalid_argument("Faculty doesn't exist");
+            // Dereference here first in case double ptr is null
+            (*foundFaculty)->printAdvisees(masterStudent);
+        } catch (invalid_argument) {
+            cout << "Invalid ID!" << endl;
+            success = false;
+        }
+    }
 }

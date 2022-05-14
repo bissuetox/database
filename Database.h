@@ -23,14 +23,16 @@
             void ingestChoice(int choiceInt);
 
             void printAllStudents();
-            void printAllFaculty();
-            void addStudent(int id, string name, string level, string major, double gpa, int advisor_id);
+            Student* addStudent(int id, string name, string level, string major, double gpa, int advisor_id);
             void promptAddStudent();
             void parseAddStudent(string line);
 
-            void addFaculty(int id, string name, string level, string department);
+
+            void printAllFaculty();
+            Faculty* addFaculty(int id, string name, string level, string department);
             void promptAddFaculty();
             void parseAddFaculty(string line);
+            void promptPrintFacultysAdvisees();
     };
 
 #endif
