@@ -81,7 +81,7 @@
             return;
 
         inOrder(node->left);
-        cout << node->key << endl;
+        cout << *node->key << endl;
         inOrder(node->right);
     }
 
@@ -132,35 +132,36 @@
     int BST<T>::getNumNodes() {
         return numNodes;
     }
+
     template <class T>
     void BST<T>::insert(T value){
         TreeNode<T> *node = new TreeNode<T>(value);
         
-        if(isEmpty())
+        if(isEmpty()) {
             root = node;
-        else{
+            ++numNodes;
+        } else {
             //the tree is not empty
             TreeNode<T> *current = root;
             TreeNode<T> *parent = NULL;
 
             while(true){
                 parent = current;
-                
                 if(value < current->key){
-                    //we go left
+                    // Traverse left
                     current = current->left;
                     if(current == NULL){
-                        //we found the insertion point
+                        // We found the insertion point
                         parent->left = node;
                         ++numNodes;
                         break;
                     }
                 }
                 else{
-                    //we go right
+                    // Traverse right
                     current = current->right;
                     if(current == NULL){
-                        //we found the insertion point
+                        // We found the insertion point
                         parent->right = node;
                         ++numNodes;
                         break;
@@ -168,7 +169,6 @@
                 }
             }
         }
-        
     }
 
     template <class T>

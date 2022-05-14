@@ -23,6 +23,9 @@
             void ingestChoice(int choiceInt);
 
             void printAllStudents();
+            void printAllFaculty();
+            void addStudent(int id, string name, string level, string major, double gpa, int advisor_id);
+            void promptAddStudent();
     };
 
 #endif

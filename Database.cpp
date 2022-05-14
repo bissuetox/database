@@ -15,6 +15,9 @@ void Database::setup() {
         cout << "Is open!" << endl;
         while(fp.getLine(read)) {
             cout << read << endl;
+            // parseAddStudent();
+            // promptStudentInfo();
+            // addStudent();
         }
     } else {
         cout << "Not open" << endl;
@@ -46,11 +49,10 @@ void Database::interfaceLoop() {
 void Database::ingestChoice(int choiceInt) {
     switch(choiceInt) {
         case 1:
-            // printAllStudents();
-            masterStudent.printNodes();
+            printAllStudents();
             break;
         case 2:
-            // printAllFaculty();
+            printAllFaculty();
             break;
         case 3:
             // findStudent();
@@ -65,7 +67,7 @@ void Database::ingestChoice(int choiceInt) {
             // findFacultysAdvisees();
             break;
         case 7:
-            // addStudent();
+            promptAddStudent();
             break;
         case 8:
             // deleteStudentById();
@@ -93,7 +95,6 @@ void Database::ingestChoice(int choiceInt) {
     }
 }
 
-
 // Helper function to return string of options
 void Database::printOptions() {
     string options = "Enter an option below:\n";
@@ -114,10 +115,72 @@ void Database::printOptions() {
     cout << options << "> ";
 }
 
+// Prints all students in masterStudent
 void Database::printAllStudents() {
     if (masterStudent.getNumNodes() == 0) {
         cout << "No Students in the Database!" << endl;
     } else {
         masterStudent.printNodes();
+    }
+}
+
+// Prints all faculty in masterFaculty
+void Database::printAllFaculty() {
+    if (masterFaculty.getNumNodes() == 0) {
+        cout << "No Faculty in the Database!" << endl;
+    } else {
+        masterFaculty.printNodes();
+    }
+}
+
+void Database::addStudent(int id, string name, string level, string major, double gpa, int advisor_id) {
+    Student* newStudent = new Student(id, name, level, major, gpa, advisor_id);
+    masterStudent.insert(newStudent);
+}
+
+// Prompts user for student data then adds it to masterStudent
+void Database::promptAddStudent() {
+    string name, level, major, id_str, advisor_id_str, gpa_str;
+    int id, advisor_id;
+    double gpa;
+    bool success = false;
+    while (!success) {
+        try {
+            success = true;
+            cout << "Enter student ID: \n> ";
+            getline(cin, id_str);
+            id = stoi(id_str);
+
+            cout << "Enter student name: \n> ";
+            getline(cin, name);
+
+            cout << "Enter student grade: \n> ";
+            getline(cin, level);
+
+            cout << "Enter student major: \n> ";
+            getline(cin, major);
+
+            cout << "Enter student GPA: \n> ";
+            getline(cin, gpa_str);
+            gpa = stod(gpa_str);
+
+            if (masterFaculty.getNumNodes() == 0) {
+                cout << "No faculty available, assigning -1 for advisor ID." << endl;
+                advisor_id = -1;
+            } else {
+                cout << "Enter student's advisor ID: \n> ";
+                getline(cin, advisor_id_str);
+                advisor_id = stoi(advisor_id_str);
+                Faculty dummyFaculty(advisor_id, "", "", "");
+                if (!masterFaculty.contains(&dummyFaculty)) {
+                    throw(invalid_argument("Faculty ID not in masterFaculty"));
+                }
+            }
+
+            addStudent(id, name, level, major, gpa, advisor_id);
+        } catch (invalid_argument) {
+            cout << "Invalid input! Try again." << endl << endl;
+            success = false;
+        }
     }
 }
