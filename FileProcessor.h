@@ -21,6 +21,7 @@ class FileProcessor {
         bool isOpenRead();
         bool isOpenWrite();
         istream& getLine(string& line);
+        ostream& write(string line);
 
     private:
         ifstream* inStream;

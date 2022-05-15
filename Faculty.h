@@ -18,6 +18,6 @@
             void print(ostream& os) const;
             void printAdvisees(BST<Student>& masterStudent);
             void addAdviseeId(int id);
+            bool hasAdviseeId(int id);
     };
-
 #endif

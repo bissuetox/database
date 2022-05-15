@@ -22,6 +22,12 @@
             void printOptions();
             void ingestChoice(int choiceInt);
 
+            void save();
+            void traverseSaveStudent(TreeNode<Student>* const node);
+            void traverseSaveFaculty(TreeNode<Faculty>* const node);
+            string formatStudent(Student* s);
+            string formatFaculty(Faculty *f);
+
             // Student methods
             Student* addStudent(int id, string name, string level, string major, double gpa, int advisor_id);
             Student* findStudent(int id);
@@ -44,6 +50,7 @@
             void promptPrintFacultysAdvisees();
             void promptPrintFaculty();
             void promptDeleteFaculty();
+            void removeAdviseeFromFaculty();
     };
 
 #endif

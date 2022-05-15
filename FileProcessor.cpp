@@ -6,7 +6,7 @@ using namespace std;
 FileProcessor::FileProcessor() {
     // Open null streams - can be opened with openRead or openWrite
     inStream = new ifstream(NULL);
-    outStream = new ofstream(NULL);
+    outStream = new ofstream(NULL, ios::trunc);
 }
 
 FileProcessor::FileProcessor(string inPath="", string outPath="") {
@@ -68,6 +68,11 @@ bool FileProcessor::isOpenWrite() {
 istream& FileProcessor::getLine(string& line) {
     return std::getline(*inStream, line);
 }
+
+ostream& FileProcessor::write(string line) {
+    return *outStream << line;
+}
+
 // Prompts for filepath and returns it. "input" or "output" type changes prompt message
 string FileProcessor::promptFilepath(string type) {
     string path = "";

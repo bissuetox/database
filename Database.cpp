@@ -1,6 +1,5 @@
 #include "Database.h"
 #include <exception>
-// #include <string.h>
 #include <sstream>
 #define STUDENT_PATH "./db/studentTable.csv"
 #define FACULTY_PATH "./db/facultyTable.csv"
@@ -9,6 +8,7 @@ Database::Database() {
 
 }
 
+// Load database files if they exist
 void Database::setup() {
     string read;
 
@@ -16,7 +16,7 @@ void Database::setup() {
     fp.openRead(STUDENT_PATH);
     // If file exists and is open, try to scan it in
     if (fp.isOpenRead()) {
-        while(fp.getLine(read)) {
+        while(fp.getLine(read) && read != "") {
             // Ignore comments starting with '#'
             if (read.at(0) == '#') continue;
             else parseAddStudent(read);
@@ -28,7 +28,7 @@ void Database::setup() {
     fp.openRead(FACULTY_PATH);
     // If file exists and is open, try to scan it in
     if (fp.isOpenRead()) {
-        while(fp.getLine(read)) {
+        while(fp.getLine(read) && read != "") {
             // Ignore comments with '#'
             if (read.at(0) == '#') continue;
             else {
@@ -36,6 +36,77 @@ void Database::setup() {
             }
         }
     }
+    fp.closeRead(); 
+}
+
+// Save database files
+void Database::save() {
+    // Save Student DB
+    fp.openWrite(STUDENT_PATH);
+    traverseSaveStudent(masterStudent.getRoot());
+    fp.closeWrite();
+    
+    // Save Faculty DB
+    fp.openWrite(FACULTY_PATH);
+    traverseSaveFaculty(masterFaculty.getRoot());
+    fp.write("\n");
+    fp.closeWrite();
+}
+
+void Database::traverseSaveFaculty(TreeNode<Faculty>* node) {
+    if (node == NULL) {
+        return;
+    }
+    traverseSaveFaculty(node->left);
+    string s = formatFaculty(&node->key);
+    fp.write(s);
+    fp.write("\n");
+    traverseSaveFaculty(node->right);
+}
+
+void Database::traverseSaveStudent(TreeNode<Student>* node) {
+    if (node == NULL) {
+        return;
+    }
+    traverseSaveStudent(node->left);
+    string s = formatStudent(&node->key);
+    fp.write(s);
+    fp.write("\n");
+    traverseSaveStudent(node->right);
+}
+
+string Database::formatFaculty(Faculty* f) {
+    string str = "";
+    str += to_string(f->id) + ",";
+    str += f->name + ",";
+    str += f->level + ",";
+    str += f->department;
+
+    // Only add comma if there are advisees
+    if (f->advisee_ids.size() > 0) {
+        str += ",";
+    }
+
+    for (int i = 0; i < f->advisee_ids.size(); ++i) {
+        str += to_string(f->advisee_ids[i]);
+        // Only add semicolon if not the last id
+        if (i != f->advisee_ids.size() - 1) {
+            str+= ";";
+        }
+    }
+    cout << str << endl;
+    return str;
+}
+
+string Database::formatStudent(Student* f) {
+    string str = to_string(f->id) + ",";
+    str += f->name + ",";
+    str += f->level + ",";
+    str += f->major + ",";
+    str += to_string(f->gpa) + ",";
+    str += to_string(f->advisor_id);
+    cout << str << endl;
+    return str;
 }
 
 void Database::interfaceLoop() {
@@ -96,7 +167,7 @@ void Database::ingestChoice(int choiceInt) {
             changeStudentsAdvisor();
             break;
         case 12:
-            // removeAdviseeFromFaculty();
+            removeAdviseeFromFaculty();
             break;
         case 13:
             // rollback();
@@ -279,14 +350,16 @@ void Database::parseAddFaculty(string line) {
     getline(lineStream, advisee_ids, ',');
 
     id = stoi(id_str);
-    Faculty* newFaculty = addFaculty(id, name, level, department);
+    addFaculty(id, name, level, department);
+    Faculty* newFaculty = findFaculty(id);
 
     // Iterate through advisee_ids (variable amt)
-    stringstream idStream(advisee_ids);
-
-    string read;
-    while (getline(idStream, read, ';')) {
-        newFaculty->advisee_ids.push_back(stoi(read));
+    if (!(advisee_ids == "")) {
+        stringstream idStream(advisee_ids);
+        string read;
+        while (getline(idStream, read, ';')) {
+            newFaculty->advisee_ids.push_back(stoi(read));
+        }
     }
 }
 
@@ -402,8 +475,36 @@ void Database::promptDeleteFaculty() {
 void Database::changeStudentsAdvisor() {
     Student* foundStudent = promptFindStudent();
     if (foundStudent) {
-        Faculty* newFaculty = promptFindFaculty("Enter new Faculty ID\n> ");
-        if (newFaculty)
-            foundStudent->advisor_id = newFaculty->id;
+        Faculty* newAdvisor = promptFindFaculty("Enter new Faculty ID\n> ");
+        if (newAdvisor)
+            foundStudent->advisor_id = newAdvisor->id;
+            newAdvisor->addAdviseeId(foundStudent->id);
+    }
+}
+
+void Database::removeAdviseeFromFaculty() {
+    Faculty* foundFaculty = promptFindFaculty();
+    if (foundFaculty) {
+        foundFaculty->printAdvisees(masterStudent);
+        if (foundFaculty->advisee_ids.size() == 0) {
+            return;
+        }
+        cout << "Enter advisee ID to remove:\n> ";
+        try {
+            string read;
+            int id;
+            getline(cin, read);
+            id = stoi(read);
+            if (!foundFaculty->hasAdviseeId(id)) {
+                throw invalid_argument("Faculty does not have that advisee ID!");
+            }
+        } catch (invalid_argument e) {
+            if (e.what() == "stoi") {
+                cout << "Invalid Input!" << endl;
+            } else {
+                cout << e.what() << endl;
+            }
+        }
+
     }
 }
