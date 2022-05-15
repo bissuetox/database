@@ -21,6 +21,7 @@
 * [Vectors](https://www.geeksforgeeks.org/vector-in-cpp-stl/)
 * [BST Search/Insert](https://www.geeksforgeeks.org/binary-search-tree-set-1-search-and-insertion/?ref=lbp)
 * BST Delete - Zybooks
+* [Default Args Problem](https://stackoverflow.com/questions/2545720/error-default-argument-given-for-parameter-1)
 
 ## Known Errors
 

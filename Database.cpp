@@ -93,7 +93,7 @@ void Database::ingestChoice(int choiceInt) {
             promptDeleteFaculty();
             break;
         case 11:
-            // changeStudentsAdvisor();
+            changeStudentsAdvisor();
             break;
         case 12:
             // removeAdviseeFromFaculty();
@@ -160,44 +160,43 @@ void Database::promptAddStudent() {
     string name, level, major, id_str, advisor_id_str, gpa_str;
     int id, advisor_id;
     double gpa;
-    bool success = false;
-    while (!success) {
-        try {
-            success = true;
-            cout << "Enter student ID: \n> ";
-            getline(cin, id_str);
-            id = stoi(id_str);
+    try {
+        cout << "Enter student ID: \n> ";
+        getline(cin, id_str);
+        id = stoi(id_str);
 
-            cout << "Enter student name: \n> ";
-            getline(cin, name);
+        if (findStudent(id)) {
+            throw invalid_argument("Student with that ID already exists!");
+        }
 
-            cout << "Enter student grade: \n> ";
-            getline(cin, level);
+        cout << "Enter student name: \n> ";
+        getline(cin, name);
 
-            cout << "Enter student major: \n> ";
-            getline(cin, major);
+        cout << "Enter student grade: \n> ";
+        getline(cin, level);
 
-            cout << "Enter student GPA: \n> ";
-            getline(cin, gpa_str);
-            gpa = stod(gpa_str);
+        cout << "Enter student major: \n> ";
+        getline(cin, major);
 
-            if (masterFaculty.getNumNodes() == 0) {
-                cout << "No faculty available, assigning -1 for advisor ID." << endl;
-                advisor_id = -1;
-            } else {
-                cout << "Enter student's advisor ID: \n> ";
-                getline(cin, advisor_id_str);
-                advisor_id = stoi(advisor_id_str);
-                Faculty dummyFaculty(advisor_id, "", "", "");
-                if (!masterFaculty.contains(dummyFaculty)) {
-                    throw(invalid_argument("Faculty ID not in masterFaculty"));
-                }
-            }
+        cout << "Enter student GPA: \n> ";
+        getline(cin, gpa_str);
+        gpa = stod(gpa_str);
 
-            addStudent(id, name, level, major, gpa, advisor_id);
-        } catch (invalid_argument) {
-            cout << "Invalid input! Try again." << endl;
-            success = false;
+        if (masterFaculty.getNumNodes() == 0) {
+            cout << "No faculty available, assigning -1 for advisor ID." << endl;
+            advisor_id = -1;
+        } else {
+            Faculty* foundFaculty = promptFindFaculty("Enter student's advisor ID: \n> ");
+            if (!foundFaculty) return;
+            advisor_id = foundFaculty->id;
+        }
+
+        addStudent(id, name, level, major, gpa, advisor_id);
+    } catch (invalid_argument e) {
+        if (e.what() == "stoi") {
+            cout << "Invalid Input!" << endl;
+        } else {
+            cout << e.what() << endl;
         }
     }
 }
@@ -237,27 +236,30 @@ Faculty* Database::addFaculty(int id, string name, string level, string departme
 void Database::promptAddFaculty() {
     string id_str, name, level, department;
     int id;
-    bool success = false;
-    while (!success) {
-        try {
-            success = true;
-            cout << "Enter faculty ID: \n> ";
-            getline(cin, id_str);
-            id = stoi(id_str);
+    try {
+        cout << "Enter faculty ID: \n> ";
+        getline(cin, id_str);
+        id = stoi(id_str);
 
-            cout << "Enter faculty name: \n> ";
-            getline(cin, name);
+        if (findFaculty(id)) {
+            throw invalid_argument("Faculty with that ID already exists!");
+        }
 
-            cout << "Enter faculty level: \n> ";
-            getline(cin, level);
+        cout << "Enter faculty name: \n> ";
+        getline(cin, name);
 
-            cout << "Enter faculty department: \n> ";
-            getline(cin, department);
+        cout << "Enter faculty level: \n> ";
+        getline(cin, level);
 
-            addFaculty(id, name, level, department);
-        } catch (invalid_argument) {
-            cout << "Invalid input! Try again." << endl;
-            success = false;
+        cout << "Enter faculty department: \n> ";
+        getline(cin, department);
+
+        addFaculty(id, name, level, department);
+    } catch (invalid_argument e) {
+        if (e.what() == "stoi") {
+            cout << "Invalid Input!" << endl;
+        } else {
+            cout << e.what() << endl;
         }
     }
 }
@@ -289,7 +291,7 @@ void Database::parseAddFaculty(string line) {
 }
 
 // Prompts user for a Student ID and returns it if found, otherwise NULL
-Student* Database::promptFindStudent() {
+Student* Database::promptFindStudent(string prompt) {
     Student* foundStudent = NULL;
     try {
         string read;
@@ -311,12 +313,12 @@ Student* Database::promptFindStudent() {
 }
 
 // Prompts user for a Faculty ID and returns it if found, otherwise NULL
-Faculty* Database::promptFindFaculty() {
+Faculty* Database::promptFindFaculty(string prompt) {
     Faculty* foundFaculty = NULL;
     try {
         string read;
         int id;
-        cout << "Enter Faculty ID\n> ";
+        cout << prompt;
         getline(cin, read);
         id = stoi(read);
         foundFaculty = findFaculty(id);
@@ -342,6 +344,7 @@ Student* Database::findStudent(int id) {
     Student dummyStudent(id, "", "", "", 0, 0); // Dummy Student object for searching
     return masterStudent.search(dummyStudent);
 } 
+
 // Prompts for Faculty ID and prints its advisees
 void Database::promptPrintFacultysAdvisees() {
     Faculty* foundFaculty = promptFindFaculty();
@@ -393,5 +396,14 @@ void Database::promptDeleteFaculty() {
     if (foundFaculty) {
         cout << foundFaculty->name << " (" << foundFaculty->id << ") removed!" << endl;
         masterFaculty.deleteNode(*foundFaculty);
+    }
+}
+
+void Database::changeStudentsAdvisor() {
+    Student* foundStudent = promptFindStudent();
+    if (foundStudent) {
+        Faculty* newFaculty = promptFindFaculty("Enter new Faculty ID\n> ");
+        if (newFaculty)
+            foundStudent->advisor_id = newFaculty->id;
     }
 }

@@ -25,18 +25,19 @@
             // Student methods
             Student* addStudent(int id, string name, string level, string major, double gpa, int advisor_id);
             Student* findStudent(int id);
-            Student* promptFindStudent();
-            void printAllStudents();
+            Student* promptFindStudent(string prompt="Enter Student ID\n> ");
+            void printAllStudents(); 
             void promptAddStudent();
             void parseAddStudent(string line);
             void promptPrintStudent();
             void promptPrintStudentAdvisor();
             void promptDeleteStudent();
+            void changeStudentsAdvisor();
 
             // Faculty methods
             Faculty* addFaculty(int id, string name, string level, string department);
             Faculty* findFaculty(int id);
-            Faculty* promptFindFaculty();
+            Faculty* promptFindFaculty(string prompt="Enter Faculty ID\n> ");
             void printAllFaculty();
             void promptAddFaculty();
             void parseAddFaculty(string line);
