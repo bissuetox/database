@@ -10,8 +10,8 @@
 
     class Database {
         private:
-            BST<Faculty*> masterFaculty;
-            BST<Student*> masterStudent;
+            BST<Faculty> masterFaculty;
+            BST<Student> masterStudent;
             GenStack<DBTrx*> trxHistory;
             FileProcessor fp;
         public:
@@ -22,17 +22,27 @@
             void printOptions();
             void ingestChoice(int choiceInt);
 
-            void printAllStudents();
+            // Student methods
             Student* addStudent(int id, string name, string level, string major, double gpa, int advisor_id);
+            Student* findStudent(int id);
+            Student* promptFindStudent();
+            void printAllStudents();
             void promptAddStudent();
             void parseAddStudent(string line);
+            void promptPrintStudent();
+            void promptPrintStudentAdvisor();
+            void promptDeleteStudent();
 
-
-            void printAllFaculty();
+            // Faculty methods
             Faculty* addFaculty(int id, string name, string level, string department);
+            Faculty* findFaculty(int id);
+            Faculty* promptFindFaculty();
+            void printAllFaculty();
             void promptAddFaculty();
             void parseAddFaculty(string line);
             void promptPrintFacultysAdvisees();
+            void promptPrintFaculty();
+            void promptDeleteFaculty();
     };
 
 #endif

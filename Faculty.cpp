@@ -28,21 +28,24 @@ void Faculty::print(ostream& os) const {
             cout << advisee_ids.at(*i) << endl;
         }
     }
-
-    os << endl;
 }
 
 void Faculty::addAdviseeId(int id) {
     advisee_ids.push_back(id);
 }
 
-void Faculty::printAdvisees(BST<Student*>& masterStudent) {
+void Faculty::printAdvisees(BST<Student>& masterStudent) {
     int thisId;
     Student *thisStudent;
+    if (advisee_ids.size() == 0) {
+        cout << "Faculty has no advisees!" << endl;
+        return;
+    }
+
     for (auto i = advisee_ids.begin(); i != advisee_ids.end(); ++i) {
         thisId = advisee_ids.at(*i);
         Student dummyStudent(thisId, "", "", "", 0, 0); // Dummy student with id to search
-        thisStudent = *masterStudent.search(&dummyStudent);
+        thisStudent = masterStudent.search(dummyStudent);
         cout << thisStudent->id << " - " << thisStudent->name << endl;
     }
 }

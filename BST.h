@@ -82,7 +82,7 @@
             return;
 
         inOrder(node->left);
-        cout << *node->key << endl;
+        cout << node->key << endl;
         inOrder(node->right);
     }
 
@@ -268,7 +268,7 @@
                     // Must find successor (leftmost child of right subtree)
                     TreeNode<T> *suc = getSuccessor(curr);
                     T sucData = suc->key;
-                    remove(sucData); // Remove the successor
+                    deleteNode(sucData); // Remove the successor
                     curr->key = sucData; // Replace current's key with successor
                 }
 

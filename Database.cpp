@@ -17,11 +17,9 @@ void Database::setup() {
     // If file exists and is open, try to scan it in
     if (fp.isOpenRead()) {
         while(fp.getLine(read)) {
-            // Ignore comments with '#'
+            // Ignore comments starting with '#'
             if (read.at(0) == '#') continue;
-            else {
-                parseAddStudent(read);
-            }
+            else parseAddStudent(read);
         }
     }
 
@@ -43,11 +41,9 @@ void Database::setup() {
 void Database::interfaceLoop() {
     int choiceInt;
     string choiceStr;
-
     // Main Loop
     do {
         printOptions();
-
         // Catch invalid input
         try {
             getline(cin, choiceStr);
@@ -59,6 +55,8 @@ void Database::interfaceLoop() {
         }
 
     } while(choiceInt != 14);
+
+    // Save file
 }
 
 // Processes the user's choice
@@ -71,13 +69,13 @@ void Database::ingestChoice(int choiceInt) {
             printAllFaculty();
             break;
         case 3:
-            // findStudent();
+            promptPrintStudent();
             break;
         case 4:
-            // findFaculty();
+            promptPrintFaculty();
             break;
         case 5:
-           // findStudentsAdvisor(); 
+           promptPrintStudentAdvisor(); 
            break;
         case 6:
             promptPrintFacultysAdvisees();
@@ -86,13 +84,13 @@ void Database::ingestChoice(int choiceInt) {
             promptAddStudent();
             break;
         case 8:
-            // deleteStudentById();
+            promptDeleteStudent();
             break;
         case 9:
             promptAddFaculty();
             break;
         case 10:
-            // deleteFacultyById();
+            promptDeleteFaculty();
             break;
         case 11:
             // changeStudentsAdvisor();
@@ -113,21 +111,22 @@ void Database::ingestChoice(int choiceInt) {
 
 // Helper function to return string of options
 void Database::printOptions() {
-    string options = "Enter an option below:\n";
-    options += "1. Print all students and their information (sorted by ascending id #)\n";
-    options += "2. Print all faculty and their information (sorted by ascending id #)\n";
-    options += "3. Find and display student information given the students id\n";
-    options += "4. Find and display faculty information given the faculty id\n";
-    options += "5. Given a student’s id, print the name and info of their faculty advisor\n";
-    options += "6. Given a faculty id, print ALL the names and info of his/her advisees.\n";
-    options += "7. Add a new student\n";
-    options += "8. Delete a student given the id\n";
-    options += "9. Add a new faculty member\n";
-    options += "10. Delete a faculty member given the id.\n";
-    options += "11. Change a student’s advisor given the student id and the new faculty id.\n";
-    options += "12. Remove an advisee from a faculty member given the ids\n";
-    options += "13. Rollback\n";
-    options += "14. Exit\n";
+    string options = "";
+    options += "\nEnter an option below:\n";
+    options += "\t1. Print all students\n";
+    options += "\t2. Print all faculty\n";
+    options += "\t3. Find Student by ID\n";
+    options += "\t4. Find Faculty by ID\n";
+    options += "\t5. Print Student's Advisor\n";
+    options += "\t6. Print Faculty's Advisee\n";
+    options += "\t7. Add Student\n";
+    options += "\t8. Delete Student\n";
+    options += "\t9. Add Faculty Member\n";
+    options += "\t10. Delete Faculty Member\n";
+    options += "\t11. Change Student's Advisor\n";
+    options += "\t12. Remove Faculty's Advisee\n";
+    options += "\t13. Rollback last transaction\n";
+    options += "\t14. Exit\n";
     cout << options << "> ";
 }
 
@@ -152,7 +151,7 @@ void Database::printAllFaculty() {
 // Adds a student to masterStudent
 Student* Database::addStudent(int id, string name, string level, string major, double gpa, int advisor_id) {
     Student* newStudent = new Student(id, name, level, major, gpa, advisor_id);
-    masterStudent.insert(newStudent);
+    masterStudent.insert(*newStudent);
     return newStudent;
 }
 
@@ -190,14 +189,14 @@ void Database::promptAddStudent() {
                 getline(cin, advisor_id_str);
                 advisor_id = stoi(advisor_id_str);
                 Faculty dummyFaculty(advisor_id, "", "", "");
-                if (!masterFaculty.contains(&dummyFaculty)) {
+                if (!masterFaculty.contains(dummyFaculty)) {
                     throw(invalid_argument("Faculty ID not in masterFaculty"));
                 }
             }
 
             addStudent(id, name, level, major, gpa, advisor_id);
         } catch (invalid_argument) {
-            cout << "Invalid input! Try again." << endl << endl;
+            cout << "Invalid input! Try again." << endl;
             success = false;
         }
     }
@@ -230,7 +229,7 @@ void Database::parseAddStudent(string line) {
 Faculty* Database::addFaculty(int id, string name, string level, string department) {
     Faculty* newFaculty = new Faculty(id, name, level, department);
     // If first faculty, update all student's ID's to this faculty? Dependent on custom iterator
-    masterFaculty.insert(newFaculty);
+    masterFaculty.insert(*newFaculty);
     return newFaculty;
 }
 
@@ -257,7 +256,7 @@ void Database::promptAddFaculty() {
 
             addFaculty(id, name, level, department);
         } catch (invalid_argument) {
-            cout << "Invalid input! Try again." << endl << endl;
+            cout << "Invalid input! Try again." << endl;
             success = false;
         }
     }
@@ -289,26 +288,110 @@ void Database::parseAddFaculty(string line) {
     }
 }
 
+// Prompts user for a Student ID and returns it if found, otherwise NULL
+Student* Database::promptFindStudent() {
+    Student* foundStudent = NULL;
+    try {
+        string read;
+        int id;
+        cout << "Enter Student ID\n> ";
+        getline(cin, read);
+        id = stoi(read);
+        foundStudent = findStudent(id);
+        if (foundStudent == NULL) throw invalid_argument("Student ID doesn't exist.");
+    } catch (invalid_argument e) {
+        // Handle non integer input or non found faculty
+        if (e.what() == "stoi") {
+            cout << "Invalid Input!" << endl;
+        } else {
+            cout << e.what() << endl;
+        }
+    }
+    return foundStudent;
+}
+
+// Prompts user for a Faculty ID and returns it if found, otherwise NULL
+Faculty* Database::promptFindFaculty() {
+    Faculty* foundFaculty = NULL;
+    try {
+        string read;
+        int id;
+        cout << "Enter Faculty ID\n> ";
+        getline(cin, read);
+        id = stoi(read);
+        foundFaculty = findFaculty(id);
+        if (foundFaculty == NULL) throw invalid_argument("Faculty ID doesn't exist.");
+    } catch (invalid_argument e) {
+        if (e.what() == "stoi") {
+            cout << "Invalid Input!" << endl;
+        } else {
+            cout << e.what() << endl;
+        }
+    }
+    return foundFaculty;
+}
+
+// Searches and returns Faculty by ID, NULL if not found
+Faculty* Database::findFaculty(int id) {
+    Faculty dummyFaculty(id, "", "", ""); // Dummy Faculty object for searching
+    return masterFaculty.search(dummyFaculty);
+} 
+
+// Searches and returns Student by ID, NULL if not found
+Student* Database::findStudent(int id) {
+    Student dummyStudent(id, "", "", "", 0, 0); // Dummy Student object for searching
+    return masterStudent.search(dummyStudent);
+} 
 // Prompts for Faculty ID and prints its advisees
 void Database::promptPrintFacultysAdvisees() {
-    bool success = false;
-    while (!success) {
-        try {
-            success = true;
-            string read;
-            int id;
-            cout << "Enter faculty ID: \n> ";
-            getline(cin, read);
-            id = stoi(read);
-            Faculty dummyFaculty(id, "", "", ""); // Dummy Faculty object for searching
-            // Search returns double pointer to faculty
-            Faculty** foundFaculty = masterFaculty.search(&dummyFaculty);
-            if (foundFaculty == NULL) throw invalid_argument("Faculty doesn't exist");
-            // Dereference here first in case double ptr is null
-            (*foundFaculty)->printAdvisees(masterStudent);
-        } catch (invalid_argument) {
-            cout << "Invalid ID!" << endl;
-            success = false;
+    Faculty* foundFaculty = promptFindFaculty();
+    if (foundFaculty)
+        foundFaculty->printAdvisees(masterStudent);
+}
+
+// Prompts user for student ID and prints the info if found
+void Database::promptPrintStudent() {
+    Student* foundStudent = promptFindStudent();
+    if (foundStudent)
+        cout << *foundStudent;
+}
+
+// Prompts user for faculty ID and prints the info if found
+void Database::promptPrintFaculty() {
+    Faculty* foundFaculty = promptFindFaculty();
+    if (foundFaculty)
+        cout << *foundFaculty;
+}
+
+// Prompts for Student ID and prints its advisees
+void Database::promptPrintStudentAdvisor() {
+    Student* foundStudent = promptFindStudent();
+    if (foundStudent) {
+        if (foundStudent->advisor_id == -1) {
+            cout << "Advisor ID not assigned to " << foundStudent->name << "!" << endl;
+        } else {
+            Faculty dummyFaculty(foundStudent->advisor_id, "", "", ""); // Dummy Faculty object for searching
+            Faculty sFac = *masterFaculty.search(dummyFaculty);
+            cout << foundStudent->name << "'s advisor:\n";
+            cout << sFac;
         }
+    }
+}
+
+// Prompt for Student ID and delets the student if found
+void Database::promptDeleteStudent() {
+    Student* foundStudent = promptFindStudent();
+    if (foundStudent) {
+        cout << foundStudent->name << " (" << foundStudent->id << ") removed!" << endl;
+        masterStudent.deleteNode(*foundStudent);
+    }
+}
+
+// Prompt for Faculty ID and delets the student if found
+void Database::promptDeleteFaculty() {
+    Faculty* foundFaculty = promptFindFaculty();
+    if (foundFaculty) {
+        cout << foundFaculty->name << " (" << foundFaculty->id << ") removed!" << endl;
+        masterFaculty.deleteNode(*foundFaculty);
     }
 }

@@ -18,8 +18,12 @@ void Person::print(ostream& os) const {
 
 // Equality Operator Overload
 bool operator== (const Person& argPerson, const Person& thisPerson) {
-    cout << argPerson.id << " == " << thisPerson.id << endl;
     return argPerson.id == thisPerson.id;
+}
+
+// Inequality Operator Overload
+bool operator!= (const Person& argPerson, const Person& thisPerson) {
+    return argPerson.id != thisPerson.id;
 }
 
 // Less than Operator Overload

@@ -22,13 +22,10 @@ void Student::print(ostream& os) const {
     os << "Grade: " << level << endl;
     os << "Major: " << major << endl;
     os << "GPA: " << gpa << endl;
-
     // Advisor id is -1 if unset (only in chicken or egg situation)
     if (advisor_id == -1) {
         os << "No advisor assigned!" << endl;
     } else {
         os << "Advisor ID: " << advisor_id << endl;
     }
-
-    os << endl;
 }
