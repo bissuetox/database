@@ -12,7 +12,7 @@
         private:
             BST<Faculty> masterFaculty;
             BST<Student> masterStudent;
-            GenStack<DBTrx*> trxHistory;
+            GenStack<DBTrx> trxHistory;
             FileProcessor fp;
         public:
             Database();
@@ -28,6 +28,9 @@
             string formatStudent(Student* s);
             string formatFaculty(Faculty *f);
 
+            void transaction(string action, string type, Person p);
+            void rollback();
+
             // Student methods
             Student* addStudent(int id, string name, string level, string major, double gpa, int advisor_id);
             Student* findStudent(int id);
@@ -39,6 +42,7 @@
             void promptPrintStudentAdvisor();
             void promptDeleteStudent();
             void changeStudentsAdvisor();
+            void deleteStudent(int id);
 
             // Faculty methods
             Faculty* addFaculty(int id, string name, string level, string department);
@@ -51,6 +55,7 @@
             void promptPrintFaculty();
             void promptDeleteFaculty();
             void removeAdviseeFromFaculty();
+            void deleteFaculty(int id);
     };
 
 #endif

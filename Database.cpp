@@ -4,6 +4,7 @@
 #define STUDENT_PATH "./db/studentTable.csv"
 #define FACULTY_PATH "./db/facultyTable.csv"
 
+// Constructor
 Database::Database() {
 
 }
@@ -45,14 +46,16 @@ void Database::save() {
     fp.openWrite(STUDENT_PATH);
     traverseSaveStudent(masterStudent.getRoot());
     fp.closeWrite();
+    cout << "Saved to " << STUDENT_PATH << endl;
     
     // Save Faculty DB
     fp.openWrite(FACULTY_PATH);
     traverseSaveFaculty(masterFaculty.getRoot());
-    fp.write("\n");
     fp.closeWrite();
+    cout << "Saved to " << FACULTY_PATH << endl;
 }
 
+// Recursive function to save faculty in masterFaculty
 void Database::traverseSaveFaculty(TreeNode<Faculty>* node) {
     if (node == NULL) {
         return;
@@ -64,6 +67,7 @@ void Database::traverseSaveFaculty(TreeNode<Faculty>* node) {
     traverseSaveFaculty(node->right);
 }
 
+// Recursive function to save students in masterStudent
 void Database::traverseSaveStudent(TreeNode<Student>* node) {
     if (node == NULL) {
         return;
@@ -75,6 +79,7 @@ void Database::traverseSaveStudent(TreeNode<Student>* node) {
     traverseSaveStudent(node->right);
 }
 
+// Returns string of faculty formatted to file save format
 string Database::formatFaculty(Faculty* f) {
     string str = "";
     str += to_string(f->id) + ",";
@@ -94,10 +99,10 @@ string Database::formatFaculty(Faculty* f) {
             str+= ";";
         }
     }
-    cout << str << endl;
     return str;
 }
 
+// Returns string of student formatted to file save format
 string Database::formatStudent(Student* f) {
     string str = to_string(f->id) + ",";
     str += f->name + ",";
@@ -105,10 +110,10 @@ string Database::formatStudent(Student* f) {
     str += f->major + ",";
     str += to_string(f->gpa) + ",";
     str += to_string(f->advisor_id);
-    cout << str << endl;
     return str;
 }
 
+// Main Loop
 void Database::interfaceLoop() {
     int choiceInt;
     string choiceStr;
@@ -152,25 +157,25 @@ void Database::ingestChoice(int choiceInt) {
             promptPrintFacultysAdvisees();
             break;
         case 7:
-            promptAddStudent();
+            promptAddStudent(); // Add / remove
             break;
         case 8:
-            promptDeleteStudent();
+            promptDeleteStudent(); // remove / add
             break;
         case 9:
-            promptAddFaculty();
+            promptAddFaculty(); // Add / remove
             break;
         case 10:
-            promptDeleteFaculty();
+            promptDeleteFaculty(); // remove / add
             break;
         case 11:
-            changeStudentsAdvisor();
+            changeStudentsAdvisor(); // mod / mod
             break;
         case 12:
-            removeAdviseeFromFaculty();
+            removeAdviseeFromFaculty(); // mod / mod
             break;
         case 13:
-            // rollback();
+            rollback();
             break;
         case 14:
             // Outside function will exit
@@ -216,6 +221,27 @@ void Database::printAllFaculty() {
         cout << "No Faculty in the Database!" << endl;
     } else {
         masterFaculty.printNodes();
+    }
+}
+
+void Database::transaction(string action, string type, Person p) {
+    DBTrx trans(action, type, p);
+    trxHistory.push(trans);
+}
+
+void Database::rollback() {
+    DBTrx trans = trxHistory.pop();
+    if (trans.type == "student") {
+        Student p(trans.personCopy);
+        if (trans.revertAction == "remove") {
+            deleteStudent(p.id);
+        } else if (trans.revertAction == "insert") {
+            addStudent(p.id, p.name, p.level, p.major, p.gpa, p.advisor_id);
+        }
+    } else if (trans.type == "faculty") {
+
+    } else {
+        cout << "Bad Transaction type!" << endl;
     }
 }
 
@@ -472,6 +498,23 @@ void Database::promptDeleteFaculty() {
     }
 }
 
+// Deletes a faculty by ID - TODO migrate / ref int.
+void Database::deleteFaculty(int id) {
+    Faculty* foundFaculty = findFaculty(id);
+    if (foundFaculty) {
+        masterFaculty.deleteNode(*foundFaculty);
+    }
+}
+
+// Deletes a Student by ID - TODO migrate / ref int.
+void Database::deleteStudent(int id) {
+    Student* foundStudent = findStudent(id);
+    if (foundStudent) {
+        masterStudent.deleteNode(*foundStudent);
+    }
+}
+
+// Change a student's advisor ID
 void Database::changeStudentsAdvisor() {
     Student* foundStudent = promptFindStudent();
     if (foundStudent) {
@@ -482,6 +525,7 @@ void Database::changeStudentsAdvisor() {
     }
 }
 
+// Remove an Advisee from Faculty - TODO migrate student's new advisor ID
 void Database::removeAdviseeFromFaculty() {
     Faculty* foundFaculty = promptFindFaculty();
     if (foundFaculty) {

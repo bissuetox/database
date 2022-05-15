@@ -1,7 +1,8 @@
 #include "DBTrx.h"
 
-DBTrx::DBTrx(Person* p, string thatAction) {
-    personPtr = p;
+DBTrx::DBTrx(string thatAction, string thatType, Person p) {
+    personCopy = p;
+    type = thatType;
     if (thatAction == "insert") {
         // To revert, remove inserted entry
         action = "insert";
@@ -16,3 +17,15 @@ DBTrx::DBTrx(Person* p, string thatAction) {
         revertAction = "mod";
     }
 }
+
+// void DBTrx::revert(Database &db) {
+//     if (type == "student") {
+//         if (revertAction == "remove") {
+            
+//         }
+//     } else if (type == "faculty") {
+
+//     } else {
+//         cout << "Bad Transaction type!" << endl;
+//     }
+// }
