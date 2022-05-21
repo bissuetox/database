@@ -131,8 +131,6 @@ void Database::interfaceLoop() {
         }
 
     } while(choiceInt != 14);
-
-    // Save file
 }
 
 // Processes the user's choice
@@ -169,10 +167,10 @@ void Database::ingestChoice(int choiceInt) {
             promptDeleteFaculty(); // remove / add
             break;
         case 11:
-            changeStudentsAdvisor(); // mod / mod
+            promptChangeStudentsAdvisor(); // mod / mod
             break;
         case 12:
-            removeAdviseeFromFaculty(); // mod / mod
+            promptRemoveAdviseeFromFaculty(); // mod / mod
             break;
         case 13:
             rollback();
@@ -224,18 +222,29 @@ void Database::printAllFaculty() {
     }
 }
 
+// Record a revertable transaction to the transaction history
 void Database::transaction(string action, string type, Person p) {
     DBTrx trans(action, type, p);
     trxHistory.push(trans);
 }
 
+// Roll's back last transaction
 void Database::rollback() {
+    if (trxHistory.size() <= 0) {
+        cout << "No previous transactions!" << endl;
+        return;
+    }
+
     DBTrx trans = trxHistory.pop();
     if (trans.type == "student") {
         Student p(trans.personCopy);
+
+        // Remove added student
         if (trans.revertAction == "remove") {
             deleteStudent(p.id);
-        } else if (trans.revertAction == "insert") {
+        }
+        // 
+        else if (trans.revertAction == "insert") {
             addStudent(p.id, p.name, p.level, p.major, p.gpa, p.advisor_id);
         }
     } else if (trans.type == "faculty") {
@@ -280,15 +289,17 @@ void Database::promptAddStudent() {
         gpa = stod(gpa_str);
 
         if (masterFaculty.getNumNodes() == 0) {
-            cout << "No faculty available, assigning -1 for advisor ID." << endl;
-            advisor_id = -1;
+            cout << "No faculty available, add one first!" << endl;
+            return;
+            // advisor_id = -1;
         } else {
             Faculty* foundFaculty = promptFindFaculty("Enter student's advisor ID: \n> ");
             if (!foundFaculty) return;
             advisor_id = foundFaculty->id;
         }
 
-        addStudent(id, name, level, major, gpa, advisor_id);
+        Student* studentCopy = addStudent(id, name, level, major, gpa, advisor_id);
+        transaction("add", "student", *studentCopy);
     } catch (invalid_argument e) {
         if (e.what() == "stoi") {
             cout << "Invalid Input!" << endl;
@@ -469,18 +480,20 @@ void Database::promptPrintFaculty() {
 void Database::promptPrintStudentAdvisor() {
     Student* foundStudent = promptFindStudent();
     if (foundStudent) {
+        // TODO - remove this functionality? no more -1 chicken/egg
         if (foundStudent->advisor_id == -1) {
             cout << "Advisor ID not assigned to " << foundStudent->name << "!" << endl;
         } else {
-            Faculty dummyFaculty(foundStudent->advisor_id, "", "", ""); // Dummy Faculty object for searching
-            Faculty sFac = *masterFaculty.search(dummyFaculty);
-            cout << foundStudent->name << "'s advisor:\n";
-            cout << sFac;
+            // Faculty dummyFaculty(foundStudent->advisor_id, "", "", ""); // Dummy Faculty object for searching
+            // Faculty sFac = *masterFaculty.search(dummyFaculty);
+            Faculty *foundFaculty = findFaculty(foundStudent->advisor_id);
+            cout << foundStudent->name << "'s advisor: " << endl;
+            cout << *foundFaculty; // TODO - only print name and ID?
         }
     }
 }
 
-// Prompt for Student ID and delets the student if found
+// Prompt for Student ID and delets the student if found - TODO migrate / ref int.
 void Database::promptDeleteStudent() {
     Student* foundStudent = promptFindStudent();
     if (foundStudent) {
@@ -489,7 +502,7 @@ void Database::promptDeleteStudent() {
     }
 }
 
-// Prompt for Faculty ID and delets the student if found
+// Prompt for Faculty ID and delets the student if found - TODO migrate / ref int.
 void Database::promptDeleteFaculty() {
     Faculty* foundFaculty = promptFindFaculty();
     if (foundFaculty) {
@@ -498,7 +511,7 @@ void Database::promptDeleteFaculty() {
     }
 }
 
-// Deletes a faculty by ID - TODO migrate / ref int.
+// INTERNAL USE - Deletes a faculty by ID
 void Database::deleteFaculty(int id) {
     Faculty* foundFaculty = findFaculty(id);
     if (foundFaculty) {
@@ -506,7 +519,7 @@ void Database::deleteFaculty(int id) {
     }
 }
 
-// Deletes a Student by ID - TODO migrate / ref int.
+// INTERNAL USE - Deletes a Student by ID
 void Database::deleteStudent(int id) {
     Student* foundStudent = findStudent(id);
     if (foundStudent) {
@@ -515,33 +528,54 @@ void Database::deleteStudent(int id) {
 }
 
 // Change a student's advisor ID
-void Database::changeStudentsAdvisor() {
+void Database::promptChangeStudentsAdvisor() {
     Student* foundStudent = promptFindStudent();
     if (foundStudent) {
         Faculty* newAdvisor = promptFindFaculty("Enter new Faculty ID\n> ");
-        if (newAdvisor)
+        if (newAdvisor) {
+            // Remove old faculty's advisee
+            removeAdviseeFromFaculty(foundStudent->advisor_id, foundStudent->id);
             foundStudent->advisor_id = newAdvisor->id;
             newAdvisor->addAdviseeId(foundStudent->id);
+        }
     }
 }
 
 // Remove an Advisee from Faculty - TODO migrate student's new advisor ID
-void Database::removeAdviseeFromFaculty() {
+void Database::promptRemoveAdviseeFromFaculty() {
     Faculty* foundFaculty = promptFindFaculty();
     if (foundFaculty) {
-        foundFaculty->printAdvisees(masterStudent);
+        // If have no advisee's, can't remove one!
         if (foundFaculty->advisee_ids.size() == 0) {
+            cout << "Advisor has no advisees!" << endl;
             return;
         }
-        cout << "Enter advisee ID to remove:\n> ";
+
+        // If no other advisors available, reject
+        if (masterFaculty.getNumNodes() == 1) {
+            cout << "There are no other advisors available to migrate advisee to." << endl;
+            return;
+        }
+
+        // Display advisees
+        foundFaculty->printAdvisees(masterStudent);
         try {
+            // Fetch ID
+            cout << "Enter advisee ID to remove:\n> ";
             string read;
-            int id;
             getline(cin, read);
-            id = stoi(read);
-            if (!foundFaculty->hasAdviseeId(id)) {
+            int studentId = stoi(read);
+            // If ID doesn't belong to Faculty, exit
+            if (!foundFaculty->hasAdviseeId(studentId)) {
                 throw invalid_argument("Faculty does not have that advisee ID!");
             }
+            // Migrate student's advisor
+            Faculty* newAdvisor = promptFindFaculty("Select new Advisor ID:\n> ");
+            if (!newAdvisor) return;
+
+            changeStudentsAdvisor(studentId, newAdvisor->id);
+            removeAdviseeFromFaculty(foundFaculty->id, studentId);
+
         } catch (invalid_argument e) {
             if (e.what() == "stoi") {
                 cout << "Invalid Input!" << endl;
@@ -549,6 +583,26 @@ void Database::removeAdviseeFromFaculty() {
                 cout << e.what() << endl;
             }
         }
+    }
+}
 
+// INTERNAL USE - Remove advisee from Faculty's advisee list
+void Database::removeAdviseeFromFaculty(int id, int advisee_id) {
+    Faculty* foundFaculty = findFaculty(id);
+    if (foundFaculty) {
+        foundFaculty->removeAdviseeId(advisee_id);
+    }
+    // Otherwise do nothing
+}
+
+// Change a student's advisor ID
+void Database::changeStudentsAdvisor(int id, int advisor_id) {
+    Student* foundStudent = findStudent(id);
+    if (foundStudent) {
+        Faculty* newAdvisor = findFaculty(advisor_id);
+        if (newAdvisor) {
+            foundStudent->advisor_id = newAdvisor->id;
+            newAdvisor->addAdviseeId(foundStudent->id);
+        }
     }
 }

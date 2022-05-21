@@ -1,6 +1,7 @@
 #ifndef FACULTY_H
     #define FACULTY_H
     #include <iostream>
+    #include <algorithm>
     #include <vector>
     #include "Person.h"
     #include "Student.h"
@@ -19,5 +20,7 @@
             void printAdvisees(BST<Student>& masterStudent);
             void addAdviseeId(int id);
             bool hasAdviseeId(int id);
+
+            void removeAdviseeId(int id);
     };
 #endif

@@ -3,7 +3,7 @@
 // Default Constructor
 Person::Person() {
     id = -1;
-    name = "";   
+    name = "";
 }
 
 // Overloaded Constructor

@@ -58,3 +58,12 @@ bool Faculty::hasAdviseeId(int id) {
     }
     return valid;
 }
+
+// Removes id value from advisee id vector
+void Faculty::removeAdviseeId(int advisee_id) {
+    if (!hasAdviseeId(advisee_id)) {
+        cout << "ERROR: Does not contain advisee ID" << endl;
+        return;
+    }
+    advisee_ids.erase(std::remove(advisee_ids.begin(), advisee_ids.end(), advisee_id), advisee_ids.end());
+}

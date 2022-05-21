@@ -1,31 +1,23 @@
 #include "DBTrx.h"
 
+DBTrx::DBTrx() {
+
+}
+
 DBTrx::DBTrx(string thatAction, string thatType, Person p) {
     personCopy = p;
     type = thatType;
-    if (thatAction == "insert") {
-        // To revert, remove inserted entry
-        action = "insert";
+    if (thatAction == "add") {
+        // To revert, remove added entry
+        action = "add";
         revertAction = "remove";
     } else if (thatAction == "remove") {
-        // To revert, insert removed entry
+        // To revert, add removed entry
         action = "remove";
-        revertAction = "insert";
+        revertAction = "add";
     } else if (thatAction == "mod") {
         // To revert set entry to old values
         action = "mod";
         revertAction = "mod";
     }
 }
-
-// void DBTrx::revert(Database &db) {
-//     if (type == "student") {
-//         if (revertAction == "remove") {
-            
-//         }
-//     } else if (type == "faculty") {
-
-//     } else {
-//         cout << "Bad Transaction type!" << endl;
-//     }
-// }

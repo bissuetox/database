@@ -33,7 +33,6 @@
 
             // Student methods
             Student* addStudent(int id, string name, string level, string major, double gpa, int advisor_id);
-            Student* findStudent(int id);
             Student* promptFindStudent(string prompt="Enter Student ID\n> ");
             void printAllStudents(); 
             void promptAddStudent();
@@ -42,11 +41,9 @@
             void promptPrintStudentAdvisor();
             void promptDeleteStudent();
             void changeStudentsAdvisor();
-            void deleteStudent(int id);
 
             // Faculty methods
             Faculty* addFaculty(int id, string name, string level, string department);
-            Faculty* findFaculty(int id);
             Faculty* promptFindFaculty(string prompt="Enter Faculty ID\n> ");
             void printAllFaculty();
             void promptAddFaculty();
@@ -54,8 +51,16 @@
             void promptPrintFacultysAdvisees();
             void promptPrintFaculty();
             void promptDeleteFaculty();
-            void removeAdviseeFromFaculty();
+            void promptRemoveAdviseeFromFaculty();
+            void promptChangeStudentsAdvisor();
+
+            // Internal Use Methods
+            Student* findStudent(int id);
+            Faculty* findFaculty(int id);
+            void deleteStudent(int id);
             void deleteFaculty(int id);
+            void removeAdviseeFromFaculty(int id, int advisee_id);
+            void changeStudentsAdvisor(int id, int advisor_id);
     };
 
 #endif
