@@ -333,7 +333,7 @@ void Database::promptAddStudent() {
         cout << "Enter student name: \n> ";
         getline(cin, name);
 
-        cout << "Enter student grade: \n> ";
+        cout << "Enter student grade level: \n> ";
         getline(cin, level);
 
         cout << "Enter student major: \n> ";

@@ -23,10 +23,11 @@ void Faculty::print(ostream& os) const {
     if (advisee_ids.size() == 0) {
         os << "No Student Advisees!" << endl;
     } else {
-        cout << "Student IDs:" << endl;
-        for (auto i = advisee_ids.begin(); i != advisee_ids.end(); ++i) {
+        cout << "Advisee IDs:" << endl;
+        for (auto i = advisee_ids.begin(); i != advisee_ids.end(); ++i) {\
             cout << *i << endl;
         }
+        cout << endl;
     }
 }
 
