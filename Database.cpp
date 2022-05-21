@@ -179,28 +179,30 @@ void Database::ingestChoice(int choiceInt) {
             // Outside function will exit
             break;
         default:
-            throw invalid_argument("Invalid choice entered.");
+            throw invalid_argument("ERROR: Invalid choice entered.");
     }
 }
 
 // Helper function to return string of options
 void Database::printOptions() {
-    string options = "";
-    options += "\nEnter an option below:\n";
-    options += "\t1. Print all students\n";
-    options += "\t2. Print all faculty\n";
-    options += "\t3. Find Student by ID\n";
-    options += "\t4. Find Faculty by ID\n";
-    options += "\t5. Print Student's Advisor\n";
-    options += "\t6. Print Faculty's Advisee\n";
-    options += "\t7. Add Student\n";
-    options += "\t8. Delete Student\n";
-    options += "\t9. Add Faculty Member\n";
-    options += "\t10. Delete Faculty Member\n";
-    options += "\t11. Change Student's Advisor\n";
-    options += "\t12. Remove Faculty's Advisee\n";
-    options += "\t13. Rollback last transaction\n";
-    options += "\t14. Exit\n";
+    string options = "\n";
+    options += "-----------------------------------\n";
+    options += "|   Enter an option below:        |\n";
+    options += "|    1. Print all students        |\n";
+    options += "|    2. Print all faculty         |\n";
+    options += "|    3. Find Student by ID        |\n";
+    options += "|    4. Find Faculty by ID        |\n";
+    options += "|    5. Print Student's Advisor   |\n";
+    options += "|    6. Print Faculty's Advisee   |\n";
+    options += "|    7. Add Student               |\n";
+    options += "|    8. Delete Student            |\n";
+    options += "|    9. Add Faculty Member        |\n";
+    options += "|   10. Delete Faculty Member     |\n";
+    options += "|   11. Change Student's Advisor  |\n";
+    options += "|   12. Remove Faculty's Advisee  |\n";
+    options += "|   13. Rollback last transaction |\n";
+    options += "|   14. Exit                      |\n";
+    options += "-----------------------------------\n";
     cout << options << "> ";
 }
 
@@ -325,7 +327,7 @@ void Database::promptAddStudent() {
         id = stoi(id_str);
 
         if (findStudent(id)) {
-            throw invalid_argument("Student with that ID already exists!");
+            throw invalid_argument("ERROR: Student with that ID already exists!");
         }
 
         cout << "Enter student name: \n> ";
@@ -403,7 +405,7 @@ void Database::promptAddFaculty() {
         id = stoi(id_str);
 
         if (findFaculty(id)) {
-            throw invalid_argument("Faculty with that ID already exists!");
+            throw invalid_argument("ERROR: Faculty with that ID already exists!");
         }
 
         cout << "Enter faculty name: \n> ";
@@ -461,7 +463,7 @@ Student* Database::promptFindStudent(string prompt) {
         getline(cin, read);
         id = stoi(read);
         foundStudent = findStudent(id);
-        if (foundStudent == NULL) throw invalid_argument("Student ID doesn't exist.");
+        if (foundStudent == NULL) throw invalid_argument("ERROR: Student ID doesn't exist.");
     } catch (invalid_argument e) {
         handleException(e);
     }
@@ -478,14 +480,9 @@ Faculty* Database::promptFindFaculty(string prompt) {
         getline(cin, read);
         id = stoi(read);
         foundFaculty = findFaculty(id);
-        if (foundFaculty == NULL) throw invalid_argument("Faculty ID doesn't exist.");
+        if (foundFaculty == NULL) throw invalid_argument("ERROR: Faculty ID doesn't exist.");
     } catch (invalid_argument e) {
-        string what = e.what();
-        if (what == "stoi") {
-            cout << "Invalid Input!" << endl;
-        } else {
-            cout << e.what() << endl;
-        }
+        handleException(e);
     }
     return foundFaculty;
 }
@@ -573,7 +570,7 @@ void Database::promptDeleteFaculty() {
                 getline(cin, read);
                 id = stoi(read);
                 Faculty* newAdvisor = findFaculty(id);
-                if (!newAdvisor) throw invalid_argument("Faculty ID doesn't exist.");
+                if (!newAdvisor) throw invalid_argument("ERROR: Faculty ID doesn't exist.");
 
                 // Scrub through advisee's and migrate them
                 vector<int>* ids = &foundFaculty->advisee_ids;
@@ -652,7 +649,7 @@ void Database::promptRemoveAdviseeFromFaculty() {
             int studentId = stoi(read);
             // If ID doesn't belong to Faculty, exit
             if (!foundFaculty->hasAdviseeId(studentId)) {
-                throw invalid_argument("Faculty does not have that advisee ID!");
+                throw invalid_argument("ERROR: Faculty does not have that advisee ID!");
             }
             // Migrate student's advisor
             Faculty* newAdvisor = promptFindFaculty("Select new Advisor ID:\n> ");
@@ -695,7 +692,7 @@ void Database::changeStudentsAdvisor(int id, int advisor_id) {
 void Database::handleException(invalid_argument e) {
     string what = e.what();
     if (what == "stoi") {
-        cout << "Invalid Input!" << endl;
+        cout << "ERROR: Invalid Input!" << endl;
     } else {
         cout << e.what() << endl;
     }
