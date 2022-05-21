@@ -251,7 +251,7 @@ void Database::rollback() {
             deleteStudent(s->id);
             cout << "Rolled back addition of student " << s->id << " - " << s->name << endl;
         }
-        // Add removed student
+        // Re-adding removed student
         else if (trans.revertAction == "add") {
             addStudent(s->id, s->name, s->level, s->major, s->gpa, s->advisor_id);
             Faculty* foundFaculty = findFaculty(s->advisor_id);
@@ -273,7 +273,28 @@ void Database::rollback() {
         if (trans.revertAction == "remove") {
             deleteFaculty(f->id);
         }
+        // Re-adding removed faculty
         else if (trans.revertAction == "add") {
+            addFaculty(f->id, f->name, f->level, f->department);
+            Faculty* restoredFaculty = findFaculty(f->id);
+            vector<int>* old_ids = &f->advisee_ids;
+            if (old_ids->size() > 0) {
+                // Get sample student to fetch current Advisor
+                Student* sampleStudent = findStudent(old_ids->at(0)); 
+                Faculty* currFaculty = findFaculty(sampleStudent->advisor_id);
+
+                // Migrate advisees
+                int thisId;
+                Student* thisStudent = NULL;
+                for (int i=0; i < old_ids->size(); ++i) {
+                    thisId = old_ids->at(i);
+                    thisStudent = findStudent(thisId);
+
+                    currFaculty->removeAdviseeId(thisId);
+                    thisStudent->advisor_id = restoredFaculty->id;  // Change student's advisor_id
+                    restoredFaculty->addAdviseeId(thisId);      // Add student to advisee list
+                }
+            }
 
         }
         // Revert mod to student's advisor
@@ -532,7 +553,6 @@ void Database::promptDeleteStudent() {
 
 // Prompt for Faculty ID and delets the student if found - TODO migrate / ref int.
 void Database::promptDeleteFaculty() {
-
     Faculty* foundFaculty = promptFindFaculty();
     if (foundFaculty) {
         // If students exist and no other advisors available, reject
@@ -541,11 +561,14 @@ void Database::promptDeleteFaculty() {
             return;
         }
 
+        facultyTransaction("remove", *foundFaculty);
+
         // Prompt for replace advisor if advisees exist
         if (foundFaculty->advisee_ids.size() > 0) {
             try {
                 string read;
                 int id;
+                cout << "Warning: Faculty has advisee's linked!" << endl;
                 cout << "Enter replacement advisor ID\n> ";
                 getline(cin, read);
                 id = stoi(read);
@@ -554,8 +577,13 @@ void Database::promptDeleteFaculty() {
 
                 // Scrub through advisee's and migrate them
                 vector<int>* ids = &foundFaculty->advisee_ids;
+                int thisId;
+                Student* thisStudent = NULL;
                 for (int i=0; i < ids->size(); ++i) {
-                    newAdvisor->addAdviseeId(ids->at(i));
+                    thisId = ids->at(i);
+                    thisStudent = findStudent(thisId);
+                    thisStudent->advisor_id = newAdvisor->id;
+                    newAdvisor->addAdviseeId(thisId);
                 }
             } catch (invalid_argument e) {
                 handleException(e);
@@ -664,6 +692,7 @@ void Database::changeStudentsAdvisor(int id, int advisor_id) {
     }
 }
 
+// Handles printing of exception messages
 void Database::handleException(invalid_argument e) {
     string what = e.what();
     if (what == "stoi") {
