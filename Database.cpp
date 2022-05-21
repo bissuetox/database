@@ -193,7 +193,7 @@ void Database::printOptions() {
     options += "|    3. Find Student by ID        |\n";
     options += "|    4. Find Faculty by ID        |\n";
     options += "|    5. Print Student's Advisor   |\n";
-    options += "|    6. Print Faculty's Advisee   |\n";
+    options += "|    6. Print Faculty's Advisees  |\n";
     options += "|    7. Add Student               |\n";
     options += "|    8. Delete Student            |\n";
     options += "|    9. Add Faculty Member        |\n";
