@@ -24,8 +24,8 @@ FileProcessor::~FileProcessor() {
         outStream->close();
     }
 
-    delete inStream;
-    delete outStream;
+    // delete inStream;
+    // delete outStream;
 }
 
 // Open file for reading - return true if successful

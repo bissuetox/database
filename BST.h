@@ -40,6 +40,7 @@
         public:
             BST();
             virtual ~BST();
+            void destroyRecursive(TreeNode<T>* node);
             T* search(T k);
             void insert(T value);
             bool contains(T value);//search
@@ -67,8 +68,16 @@
 
     template <class T>
     BST<T>::~BST(){
-        //build some character
-        //and do a little research
+        destroyRecursive(root);
+    }
+
+    template <class T>
+    void BST<T>::destroyRecursive(TreeNode<T>* node){
+        if (node) {
+            destroyRecursive(node->left);
+            destroyRecursive(node->right);
+            delete node;
+        }
     }
 
     template <class T>
