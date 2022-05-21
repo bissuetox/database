@@ -4,7 +4,6 @@
 Faculty::Faculty() : Person() {
     level = "";
     department = "";
-    // foo = 5;
 }
 
 // Overloaded Constructor
@@ -14,6 +13,7 @@ Faculty::Faculty(int new_id, string new_name, string new_level, string new_depar
     // Leave advisee_ids empty
 }
 
+// Prints Faculty info to stream provided
 void Faculty::print(ostream& os) const {
     os << "ID: " << id << endl;
     os << "Name: " << name << endl;
@@ -30,10 +30,12 @@ void Faculty::print(ostream& os) const {
     }
 }
 
+// Adds advisee ID to advisee list
 void Faculty::addAdviseeId(int id) {
     advisee_ids.push_back(id);
 }
 
+// Prints advisees
 void Faculty::printAdvisees(BST<Student>& masterStudent) {
     int thisId;
     Student *thisStudent;
@@ -50,6 +52,7 @@ void Faculty::printAdvisees(BST<Student>& masterStudent) {
     }
 }
 
+// Returns bool if advisee exists in advisee list
 bool Faculty::hasAdviseeId(int id) {
     bool valid = false;
     for (int i = 0; i < advisee_ids.size(); ++i) {

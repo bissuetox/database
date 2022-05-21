@@ -8,15 +8,6 @@ Student::Student() {
     advisor_id = 0;
 }
 
-Student::Student(Person p) {
-    id = p.id;
-    name = p.name;
-    level = "";
-    major = "";
-    gpa = 0.0;
-    advisor_id = 0;
-}
-
 // Overloaded Constructor
 Student::Student(int new_id, string new_name, string new_level, string new_major, double new_gpa, int new_advisor_id) : Person(new_id, new_name) {
     level = new_level;

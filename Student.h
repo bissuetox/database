@@ -13,7 +13,6 @@
             int advisor_id;
 
             Student();
-            Student(Person p);
             Student(int new_id, string new_name, string new_level, string new_major, double new_gpa, int new_advisor_id);
             void print(ostream& os) const;
     };

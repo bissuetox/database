@@ -223,8 +223,14 @@ void Database::printAllFaculty() {
 }
 
 // Record a revertable transaction to the transaction history
-void Database::transaction(string action, string type, Person p) {
-    DBTrx trans(action, type, p);
+void Database::studentTransaction(string action, Student s) {
+    DBTrx trans(action, "student", s);
+    trxHistory.push(trans);
+}
+
+// Record a revertable transaction to the transaction history
+void Database::facultyTransaction(string action, Faculty f) {
+    DBTrx trans(action, "faculty", f);
     trxHistory.push(trans);
 }
 
@@ -237,18 +243,43 @@ void Database::rollback() {
 
     DBTrx trans = trxHistory.pop();
     if (trans.type == "student") {
-        Student p(trans.personCopy);
+        Student *s = &trans.studentCopy;
 
         // Remove added student
         if (trans.revertAction == "remove") {
-            deleteStudent(p.id);
+            removeAdviseeFromFaculty(s->advisor_id, s->id);
+            deleteStudent(s->id);
+            cout << "Rolled back addition of student " << s->id << " - " << s->name << endl;
         }
-        // 
-        else if (trans.revertAction == "insert") {
-            addStudent(p.id, p.name, p.level, p.major, p.gpa, p.advisor_id);
+        // Add removed student
+        else if (trans.revertAction == "add") {
+            addStudent(s->id, s->name, s->level, s->major, s->gpa, s->advisor_id);
+            Faculty* foundFaculty = findFaculty(s->advisor_id);
+            foundFaculty->addAdviseeId(s->id);
+            cout << "Rolled back removal of student " << s->id << " - " << s->name << endl;
+        }
+        // Revert mod to student's advisor
+        else if (trans.revertAction == "mod") {
+            Student* currStudent = findStudent(s->id);
+            Faculty* currAdvisor = findFaculty(currStudent->advisor_id);
+            Faculty* origAdvisor = findFaculty(s->advisor_id);
+            currAdvisor->removeAdviseeId(s->id);
+            origAdvisor->addAdviseeId(s->id);
+            currStudent->advisor_id = s->advisor_id;
+            cout << "Rolled back advisor change for student " << s->id << " - " << s->name << endl;
         }
     } else if (trans.type == "faculty") {
+        Faculty *f = &trans.facultyCopy;
+        if (trans.revertAction == "remove") {
+            deleteFaculty(f->id);
+        }
+        else if (trans.revertAction == "add") {
 
+        }
+        // Revert mod to student's advisor
+        else if (trans.revertAction == "mod") {
+
+        }
     } else {
         cout << "Bad Transaction type!" << endl;
     }
@@ -298,14 +329,14 @@ void Database::promptAddStudent() {
             advisor_id = foundFaculty->id;
         }
 
-        Student* studentCopy = addStudent(id, name, level, major, gpa, advisor_id);
-        transaction("add", "student", *studentCopy);
+        addStudent(id, name, level, major, gpa, advisor_id);
+        Student* newStudent = findStudent(id);
+        Faculty* newAdvisor = findFaculty(advisor_id);
+        newAdvisor->addAdviseeId(id);
+        
+        studentTransaction("add", *newStudent);
     } catch (invalid_argument e) {
-        if (e.what() == "stoi") {
-            cout << "Invalid Input!" << endl;
-        } else {
-            cout << e.what() << endl;
-        }
+        handleException(e);
     }
 }
 
@@ -363,12 +394,10 @@ void Database::promptAddFaculty() {
         getline(cin, department);
 
         addFaculty(id, name, level, department);
+        Faculty* newFaculty = findFaculty(id);
+        facultyTransaction("add", *newFaculty);
     } catch (invalid_argument e) {
-        if (e.what() == "stoi") {
-            cout << "Invalid Input!" << endl;
-        } else {
-            cout << e.what() << endl;
-        }
+        handleException(e);
     }
 }
 
@@ -412,12 +441,7 @@ Student* Database::promptFindStudent(string prompt) {
         foundStudent = findStudent(id);
         if (foundStudent == NULL) throw invalid_argument("Student ID doesn't exist.");
     } catch (invalid_argument e) {
-        // Handle non integer input or non found faculty
-        if (e.what() == "stoi") {
-            cout << "Invalid Input!" << endl;
-        } else {
-            cout << e.what() << endl;
-        }
+        handleException(e);
     }
     return foundStudent;
 }
@@ -434,7 +458,8 @@ Faculty* Database::promptFindFaculty(string prompt) {
         foundFaculty = findFaculty(id);
         if (foundFaculty == NULL) throw invalid_argument("Faculty ID doesn't exist.");
     } catch (invalid_argument e) {
-        if (e.what() == "stoi") {
+        string what = e.what();
+        if (what == "stoi") {
             cout << "Invalid Input!" << endl;
         } else {
             cout << e.what() << endl;
@@ -497,17 +522,49 @@ void Database::promptPrintStudentAdvisor() {
 void Database::promptDeleteStudent() {
     Student* foundStudent = promptFindStudent();
     if (foundStudent) {
-        cout << foundStudent->name << " (" << foundStudent->id << ") removed!" << endl;
+        studentTransaction("remove", *foundStudent);
+        Faculty* foundFaculty = findFaculty(foundStudent->advisor_id);
+        foundFaculty->removeAdviseeId(foundStudent->id);
         masterStudent.deleteNode(*foundStudent);
+        cout << foundStudent->name << " (" << foundStudent->id << ") removed!" << endl;
     }
 }
 
 // Prompt for Faculty ID and delets the student if found - TODO migrate / ref int.
 void Database::promptDeleteFaculty() {
+
     Faculty* foundFaculty = promptFindFaculty();
     if (foundFaculty) {
-        cout << foundFaculty->name << " (" << foundFaculty->id << ") removed!" << endl;
+        // If students exist and no other advisors available, reject
+        if (masterFaculty.getNumNodes() == 1 && masterStudent.getNumNodes() > 0) {
+            cout << "There are no other advisors available to migrate advisee(s) to." << endl;
+            return;
+        }
+
+        // Prompt for replace advisor if advisees exist
+        if (foundFaculty->advisee_ids.size() > 0) {
+            try {
+                string read;
+                int id;
+                cout << "Enter replacement advisor ID\n> ";
+                getline(cin, read);
+                id = stoi(read);
+                Faculty* newAdvisor = findFaculty(id);
+                if (!newAdvisor) throw invalid_argument("Faculty ID doesn't exist.");
+
+                // Scrub through advisee's and migrate them
+                vector<int>* ids = &foundFaculty->advisee_ids;
+                for (int i=0; i < ids->size(); ++i) {
+                    newAdvisor->addAdviseeId(ids->at(i));
+                }
+            } catch (invalid_argument e) {
+                handleException(e);
+            }
+        }
+
+        // Delete from faculty table
         masterFaculty.deleteNode(*foundFaculty);
+        cout << foundFaculty->name << " (" << foundFaculty->id << ") removed!" << endl;
     }
 }
 
@@ -533,10 +590,11 @@ void Database::promptChangeStudentsAdvisor() {
     if (foundStudent) {
         Faculty* newAdvisor = promptFindFaculty("Enter new Faculty ID\n> ");
         if (newAdvisor) {
-            // Remove old faculty's advisee
+            studentTransaction("mod", *foundStudent);
             removeAdviseeFromFaculty(foundStudent->advisor_id, foundStudent->id);
             foundStudent->advisor_id = newAdvisor->id;
             newAdvisor->addAdviseeId(foundStudent->id);
+            cout << "Changed advisor to " << newAdvisor->name << " (" << newAdvisor->id << ")" << endl;
         }
     }
 }
@@ -572,16 +630,15 @@ void Database::promptRemoveAdviseeFromFaculty() {
             // Migrate student's advisor
             Faculty* newAdvisor = promptFindFaculty("Select new Advisor ID:\n> ");
             if (!newAdvisor) return;
+            Student* foundStudent = findStudent(studentId);
 
+            studentTransaction("mod", *foundStudent);
             changeStudentsAdvisor(studentId, newAdvisor->id);
             removeAdviseeFromFaculty(foundFaculty->id, studentId);
+            cout << "Removed advisee " << studentId << endl;
 
         } catch (invalid_argument e) {
-            if (e.what() == "stoi") {
-                cout << "Invalid Input!" << endl;
-            } else {
-                cout << e.what() << endl;
-            }
+            handleException(e);
         }
     }
 }
@@ -595,7 +652,7 @@ void Database::removeAdviseeFromFaculty(int id, int advisee_id) {
     // Otherwise do nothing
 }
 
-// Change a student's advisor ID
+// INTERNAL USE - Change a student's advisor ID
 void Database::changeStudentsAdvisor(int id, int advisor_id) {
     Student* foundStudent = findStudent(id);
     if (foundStudent) {
@@ -604,5 +661,14 @@ void Database::changeStudentsAdvisor(int id, int advisor_id) {
             foundStudent->advisor_id = newAdvisor->id;
             newAdvisor->addAdviseeId(foundStudent->id);
         }
+    }
+}
+
+void Database::handleException(invalid_argument e) {
+    string what = e.what();
+    if (what == "stoi") {
+        cout << "Invalid Input!" << endl;
+    } else {
+        cout << e.what() << endl;
     }
 }

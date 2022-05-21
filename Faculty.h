@@ -20,7 +20,6 @@
             void printAdvisees(BST<Student>& masterStudent);
             void addAdviseeId(int id);
             bool hasAdviseeId(int id);
-
             void removeAdviseeId(int id);
     };
 #endif

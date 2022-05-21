@@ -26,10 +26,12 @@
             void traverseSaveStudent(TreeNode<Student>* const node);
             void traverseSaveFaculty(TreeNode<Faculty>* const node);
             string formatStudent(Student* s);
-            string formatFaculty(Faculty *f);
+            string formatFaculty(Faculty* f);
 
-            void transaction(string action, string type, Person p);
+            void studentTransaction(string action, Student s);
+            void facultyTransaction(string action, Faculty s);
             void rollback();
+            void handleException(invalid_argument e);
 
             // Student methods
             Student* addStudent(int id, string name, string level, string major, double gpa, int advisor_id);
