@@ -35,4 +35,4 @@
 .vscode
 
 # DB Files
-*.csv
+db/*.csv
