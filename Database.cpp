@@ -524,20 +524,17 @@ void Database::promptPrintFaculty() {
 void Database::promptPrintStudentAdvisor() {
     Student* foundStudent = promptFindStudent();
     if (foundStudent) {
-        // TODO - remove this functionality? no more -1 chicken/egg
         if (foundStudent->advisor_id == -1) {
             cout << "ERROR: Advisor ID not assigned to " << foundStudent->name << "!" << endl;
         } else {
-            // Faculty dummyFaculty(foundStudent->advisor_id, "", "", ""); // Dummy Faculty object for searching
-            // Faculty sFac = *masterFaculty.search(dummyFaculty);
             Faculty *foundFaculty = findFaculty(foundStudent->advisor_id);
             cout << foundStudent->name << "'s advisor: " << endl;
-            cout << *foundFaculty; // TODO - only print name and ID?
+            cout << foundFaculty->id << " - " << foundFaculty->name;
         }
     }
 }
 
-// Prompt for Student ID and delets the student if found - TODO migrate / ref int.
+// Prompt for Student ID and delets the student if found
 void Database::promptDeleteStudent() {
     Student* foundStudent = promptFindStudent();
     if (foundStudent) {
@@ -549,7 +546,7 @@ void Database::promptDeleteStudent() {
     }
 }
 
-// Prompt for Faculty ID and delets the student if found - TODO migrate / ref int.
+// Prompt for Faculty ID and delets the student if found
 void Database::promptDeleteFaculty() {
     Faculty* foundFaculty = promptFindFaculty();
     if (foundFaculty) {

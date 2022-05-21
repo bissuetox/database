@@ -22,8 +22,7 @@ void Student::print(ostream& os) const {
     os << "Grade: " << level << endl;
     os << "Major: " << major << endl;
     os << "GPA: " << gpa << endl;
-    // Advisor id is -1 if unset (only in chicken or egg situation) 
-    // TODO - remove this logic? Only print advisor ID
+    // Advisor id is -1 if unset
     if (advisor_id == -1) {
         os << "No advisor assigned!" << endl;
     } else {
