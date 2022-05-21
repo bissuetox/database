@@ -33,3 +33,6 @@
 
 # vscode configuration
 .vscode
+
+# DB Files
+*.csv

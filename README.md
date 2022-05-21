@@ -1,4 +1,7 @@
 # Database
+* A database program contain Student and Faculty information.
+* Using an input loop, a user can read, write, remove and modify information in the databases.
+* Upon exiting, the databases are saved in a custom format .csv files in `/db`
 
 ## Identifying Information
 
@@ -13,6 +16,23 @@
 
 ## Source Files
 
+* BST.h
+* DBTrx.cpp
+* DBTrx.h
+* Database.cpp
+* Database.h
+* Faculty.cpp
+* Faculty.h
+* FileProcessor.cpp
+* FileProcessor.h
+* GenStack.h
+* LinkedList.h
+* ListNode.h
+* Person.cpp
+* Person.h
+* README.md
+* Student.cpp
+* Student.h
 
 ## References
 
@@ -28,7 +48,7 @@
 * N/A
 
 ## Build Insructions
-
+`make build`
 
 ## Execution Instructions
-
+`make all`
