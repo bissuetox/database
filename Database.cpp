@@ -688,7 +688,7 @@ void Database::changeStudentsAdvisor(int id, int advisor_id) {
 // Handles printing of exception messages
 void Database::handleException(invalid_argument e) {
     string what = e.what();
-    if (what == "stoi") {
+    if (what == "stoi" || what == "stod") {
         cout << "ERROR: Invalid Input!" << endl;
     } else {
         cout << e.what() << endl;
