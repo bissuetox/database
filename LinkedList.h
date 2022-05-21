@@ -51,14 +51,15 @@
         ListNode<T> * node = new ListNode<T>(d);
 
         if(isEmpty()){
+            front = node;
             back = node;
         }
         else{
             //it's not empty
             node->next = front;
             front->prev = node;
+            front = node;
         }
-        front = node;
         ++size;
     }
 
@@ -68,12 +69,13 @@
 
         if(isEmpty()){
             front = node;
+            back = node;
         }
         else{
             node->prev = back;
             back->next = node;
+            back = node;
         }
-        back = node;
         ++size;
     }
 
@@ -108,11 +110,11 @@
 
         ListNode<T> *temp = front;
 
-        if(back->prev = NULL){
+        if(back->prev == NULL){
             //only node in the list
             front = NULL;
         }
-        else{
+        else {
             //more than one node in the list
             back->prev->next = NULL;
         }

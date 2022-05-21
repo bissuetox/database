@@ -42,9 +42,10 @@
     template <class T>
     void GenStack<T>::push(T data) {
         LL->insertFront(data);
-        if (size() >= 5) {
-            LL->removeBack();
-        }
+        // if (size() >= 5) {
+        //     cout << "more than 5! removing back" << endl;
+        //     LL->removeBack();
+        // }
     }
 
     // Removes and returns the top element of the stack

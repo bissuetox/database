@@ -23,9 +23,8 @@ FileProcessor::~FileProcessor() {
     if (outStream->is_open()) {
         outStream->close();
     }
-
-    // delete inStream;
-    // delete outStream;
+    delete inStream;
+    delete outStream;
 }
 
 // Open file for reading - return true if successful

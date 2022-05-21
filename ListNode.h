@@ -25,11 +25,8 @@ template <class T> ListNode<T>::ListNode(T d){
 }
 
 template <class T> ListNode<T>::~ListNode(){
-    // Linked List takes care of these
-    if (next) delete next;
-    if (prev) delete prev;
-    // delete next;
-    // delete prev;
+    next = NULL;
+    prev = NULL;
 }
 
 #endif
