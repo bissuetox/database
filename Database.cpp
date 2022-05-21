@@ -207,7 +207,7 @@ void Database::printOptions() {
 // Prints all students in masterStudent
 void Database::printAllStudents() {
     if (masterStudent.getNumNodes() == 0) {
-        cout << "No Students in the Database!" << endl;
+        cout << "ERROR: No Students in the Database!" << endl;
     } else {
         masterStudent.printNodes();
     }
@@ -216,7 +216,7 @@ void Database::printAllStudents() {
 // Prints all faculty in masterFaculty
 void Database::printAllFaculty() {
     if (masterFaculty.getNumNodes() == 0) {
-        cout << "No Faculty in the Database!" << endl;
+        cout << "ERROR: No Faculty in the Database!" << endl;
     } else {
         masterFaculty.printNodes();
     }
@@ -237,7 +237,7 @@ void Database::facultyTransaction(string action, Faculty f) {
 // Roll's back last transaction
 void Database::rollback() {
     if (trxHistory.size() <= 0) {
-        cout << "No previous transactions!" << endl;
+        cout << "ERROR: No previous transactions!" << endl;
         return;
     }
 
@@ -249,14 +249,14 @@ void Database::rollback() {
         if (trans.revertAction == "remove") {
             removeAdviseeFromFaculty(s->advisor_id, s->id);
             deleteStudent(s->id);
-            cout << "Rolled back addition of student " << s->id << " - " << s->name << endl;
+            cout << "SUCCESS: Rolled back addition of student " << s->id << " - " << s->name << endl;
         }
         // Re-adding removed student
         else if (trans.revertAction == "add") {
             addStudent(s->id, s->name, s->level, s->major, s->gpa, s->advisor_id);
             Faculty* foundFaculty = findFaculty(s->advisor_id);
             foundFaculty->addAdviseeId(s->id);
-            cout << "Rolled back removal of student " << s->id << " - " << s->name << endl;
+            cout << "SUCCESS: Rolled back removal of student " << s->id << " - " << s->name << endl;
         }
         // Revert mod to student's advisor
         else if (trans.revertAction == "mod") {
@@ -266,12 +266,14 @@ void Database::rollback() {
             currAdvisor->removeAdviseeId(s->id);
             origAdvisor->addAdviseeId(s->id);
             currStudent->advisor_id = s->advisor_id;
-            cout << "Rolled back advisor change for student " << s->id << " - " << s->name << endl;
+            cout << "SUCCESS: Rolled back advisor change for student " << s->id << " - " << s->name << endl;
         }
     } else if (trans.type == "faculty") {
         Faculty *f = &trans.facultyCopy;
+        // Removing added faculty - no advisee cleanup needed
         if (trans.revertAction == "remove") {
             deleteFaculty(f->id);
+            cout << "SUCCESS: Removed faculty " << f->id << " - " << f->name << endl;
         }
         // Re-adding removed faculty
         else if (trans.revertAction == "add") {
@@ -294,15 +296,14 @@ void Database::rollback() {
                     thisStudent->advisor_id = restoredFaculty->id;  // Change student's advisor_id
                     restoredFaculty->addAdviseeId(thisId);      // Add student to advisee list
                 }
+                cout << "SUCCESS: Migrated advisee's from " << currFaculty->id << " - " << currFaculty->name << endl;
+                cout << "SUCCESS: Rolled back removal of faculty " << f->id << " - " << f->name << endl;
+            } else {
+                cout << "SUCCESS: Rolled back removal of faculty " << f->id << " - " << f->name << endl;
             }
-
-        }
-        // Revert mod to student's advisor
-        else if (trans.revertAction == "mod") {
-
         }
     } else {
-        cout << "Bad Transaction type!" << endl;
+        cout << "ERROR: Bad Transaction type!" << endl;
     }
 }
 
@@ -341,7 +342,7 @@ void Database::promptAddStudent() {
         gpa = stod(gpa_str);
 
         if (masterFaculty.getNumNodes() == 0) {
-            cout << "No faculty available, add one first!" << endl;
+            cout << "ERROR: No faculty available, add one first!" << endl;
             return;
             // advisor_id = -1;
         } else {
@@ -528,7 +529,7 @@ void Database::promptPrintStudentAdvisor() {
     if (foundStudent) {
         // TODO - remove this functionality? no more -1 chicken/egg
         if (foundStudent->advisor_id == -1) {
-            cout << "Advisor ID not assigned to " << foundStudent->name << "!" << endl;
+            cout << "ERROR: Advisor ID not assigned to " << foundStudent->name << "!" << endl;
         } else {
             // Faculty dummyFaculty(foundStudent->advisor_id, "", "", ""); // Dummy Faculty object for searching
             // Faculty sFac = *masterFaculty.search(dummyFaculty);
@@ -557,10 +558,9 @@ void Database::promptDeleteFaculty() {
     if (foundFaculty) {
         // If students exist and no other advisors available, reject
         if (masterFaculty.getNumNodes() == 1 && masterStudent.getNumNodes() > 0) {
-            cout << "There are no other advisors available to migrate advisee(s) to." << endl;
+            cout << "ERROR: There are no other advisors available to migrate advisee(s) to." << endl;
             return;
         }
-
         facultyTransaction("remove", *foundFaculty);
 
         // Prompt for replace advisor if advisees exist
@@ -568,7 +568,7 @@ void Database::promptDeleteFaculty() {
             try {
                 string read;
                 int id;
-                cout << "Warning: Faculty has advisee's linked!" << endl;
+                cout << "WARNING: Faculty has advisee's linked!" << endl;
                 cout << "Enter replacement advisor ID\n> ";
                 getline(cin, read);
                 id = stoi(read);
@@ -589,10 +589,9 @@ void Database::promptDeleteFaculty() {
                 handleException(e);
             }
         }
-
         // Delete from faculty table
         masterFaculty.deleteNode(*foundFaculty);
-        cout << foundFaculty->name << " (" << foundFaculty->id << ") removed!" << endl;
+        cout << "SUCCESS: " << foundFaculty->name << " (" << foundFaculty->id << ") removed!" << endl;
     }
 }
 
@@ -622,7 +621,7 @@ void Database::promptChangeStudentsAdvisor() {
             removeAdviseeFromFaculty(foundStudent->advisor_id, foundStudent->id);
             foundStudent->advisor_id = newAdvisor->id;
             newAdvisor->addAdviseeId(foundStudent->id);
-            cout << "Changed advisor to " << newAdvisor->name << " (" << newAdvisor->id << ")" << endl;
+            cout << "SUCCESS: Changed advisor to " << newAdvisor->name << " (" << newAdvisor->id << ")" << endl;
         }
     }
 }
@@ -633,13 +632,13 @@ void Database::promptRemoveAdviseeFromFaculty() {
     if (foundFaculty) {
         // If have no advisee's, can't remove one!
         if (foundFaculty->advisee_ids.size() == 0) {
-            cout << "Advisor has no advisees!" << endl;
+            cout << "ERROR: Advisor has no advisees!" << endl;
             return;
         }
 
         // If no other advisors available, reject
         if (masterFaculty.getNumNodes() == 1) {
-            cout << "There are no other advisors available to migrate advisee to." << endl;
+            cout << "ERROR: There are no other advisors available to migrate advisee to." << endl;
             return;
         }
 
@@ -663,7 +662,7 @@ void Database::promptRemoveAdviseeFromFaculty() {
             studentTransaction("mod", *foundStudent);
             changeStudentsAdvisor(studentId, newAdvisor->id);
             removeAdviseeFromFaculty(foundFaculty->id, studentId);
-            cout << "Removed advisee " << studentId << endl;
+            cout << "SUCCESS: Removed advisee " << studentId << endl;
 
         } catch (invalid_argument e) {
             handleException(e);
