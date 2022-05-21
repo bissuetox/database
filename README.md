@@ -1,7 +1,8 @@
 # Database
-* A database program contain Student and Faculty information.
-* Using an input loop, a user can read, write, remove and modify information in the databases.
-* Upon exiting, the databases are saved in a custom format .csv files in `/db`
+* A database program containing Student and Faculty information.
+* Using an input loop interface, a user can read, write, remove and modify information in the databases.
+* Upon exiting, the database contents are saved using a custom format into `.csv` files in `/db`
+* Upon running the program again, the information will load from the files - allowing persistent data across sessions.
 
 ## Identifying Information
 
@@ -51,4 +52,4 @@
 `make build`
 
 ## Execution Instructions
-`make all`
+`make run`
